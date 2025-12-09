@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ronda Supervisor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                        Ronda Supervisor</span></div>
+                <div class="user-menu">
+                    <a href="{{ url_for('dashboard') }}" class="btn-secondary btn-sm">Voltar ao Início</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="app-content">
+            <div style="text-align: center; padding: 4rem;">
+                <i class="bi bi-truck" style="font-size: 4rem; color: #ff0000; margin-bottom: 1rem;"></i>
+                <h1>Ronda Supervisor</h1>
+                <p style="color: var(--text-muted);">Em desenvolvimento.</p>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

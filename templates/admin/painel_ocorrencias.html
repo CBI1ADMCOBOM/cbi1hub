@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Geral de Ocorrências</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .section-header {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0;
+            border: none;
+            /* Override global style */
+            padding: 0;
+        }
+
+        .occurrence-list {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Tabela simplificada */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-status-novo {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-status-aberto {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .badge-status-verificando {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+        .badge-status-encerrado,
+        .badge-status-closed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-status-open {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+
+        /* Side Panel Styles */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: -500px;
+            width: 500px;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .side-panel.open {
+            right: 0;
+        }
+
+        .panel-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .btn-close-panel {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .btn-close-panel:hover {
+            color: #ef4444;
+        }
+
+        .panel-content {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .detail-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 0.5rem;
+        }
+
+        .photo-thumb {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .photo-thumb:hover {
+            transform: scale(1.05);
+        }
+
+        .panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .panel-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content"
+                style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div class="logo">BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                        Ocorrências</span></div>
+                <div class="action-buttons" style="display: flex; gap: 10px;">
+                    {% if view_type == 'active' %}
+                    <a href="{{ url_for('admin_occurrences_archived') }}" class="btn-secondary"
+                        style="margin: 0; background-color: #f97316; color: white; border: none;">
+                        <i class="bi bi-archive"></i> Ver Arquivadas
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('admin_occurrences') }}" class="btn-secondary"
+                        style="margin: 0; background-color: #10b981; color: white; border: none;">
+                        <i class="bi bi-list-check"></i> Ver Ativas
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary" style="margin: 0;">
+                        <i class="bi bi-arrow-left"></i> Voltar ao Menu Admin
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main class="app-content" style="max-width: 1200px;"> <!-- Largura maior para tabelas -->
+
+            {% if view_type == 'archived' %}
+            <div class="alert alert-info"
+                style="background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 0.5rem; padding: 1rem; margin-bottom: 2rem;">
+                <i class="bi bi-info-circle-fill"></i> Você está visualizando o histórico de ocorrências
+                arquivadas.
+            </div>
+            {% endif %}
+
+            <!-- Seção INCONSISTÊNCIA -->
+            <div class="section-header" style="border-left-color: #ffc107;"> <!-- Cor diferente para Inconsistência -->
+                <h2 class="section-title">INCONSISTÊNCIA</h2>
+                <span class="badge badge-warning">{{ inconsistencias|length }} Registros</span>
+            </div>
+            <div class="occurrence-list">
+                {% if inconsistencias %}
+                <div class="table-responsive">
+                    <div style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9em;">
+                        <i class="bi bi-info-circle"></i> Exibindo todas as inconsistências registradas.
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Talão</th>
+                                <th>Status</th>
+                                <th>Tipo</th>
+                                <th>Motivo</th>
+                                <th>Detalhes</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for inc in inconsistencias %}
+                            <tr>
+                                <td>{{ (inc.data_ocorrencia or '').split('-')[::-1] | join('/') }}</td>
+                                <td>{{ inc.talao_numero or '-' }}</td>
+                                <td>
+                                    <span class="badge badge-status-{{ (inc.status or 'NOVO') | lower }}">{{ inc.status
+                                        or 'NOVO' }}</span>
+                                </td>
+
+                                <td>
+                                    <span
+                                        class="badge badge-{{ 'primary' if inc.tipo == 'OPERACIONAL' else 'warning' }}"
+                                        style="background: {{ '#dbeafe' if inc.tipo == 'OPERACIONAL' else '#ffedd5' }}; color: {{ '#1e40af' if inc.tipo == 'OPERACIONAL' else '#9a3412' }};">
+                                        {{ inc.tipo }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if inc.tipo == 'OPERACIONAL' %}
+                                    {{ inc.motivo_op_descricao or inc.motivo_op_codigo }}
+                                    {% else %}
+                                    {{ inc.motivo_tec_descricao or inc.motivo_tec_codigo }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if inc.motivo_tec_codigo == 'T4_193' %}
+                                    <small class="text-muted">193 ({{ inc.t4_falha }})</small>
+                                    {% elif inc.motivo_tec_codigo == 'T4_APP' %}
+                                    <small class="text-muted">App ({{ inc.t4_sistema_afetado }})</small>
+                                    {% elif inc.observacao %}
+                                    <small class="text-muted"
+                                        style="display:inline-block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom;">
+                                        {{ inc.observacao }}
+                                    </small>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn-secondary btn-sm btn-view"
+                                        onclick='openIncDetails({{ inc | tojson | safe }})'
+                                        style="padding: 0.25rem 0.5rem;">Ver</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">Nenhuma inconsistência reportada até o momento.</div>
+                {% endif %}
+            </div>
+
+            <hr style="border: 0; border-top: 2px dashed rgba(255,255,255,0.3); margin: 3rem 0;">
+
+            <!-- Seção CHUVAS INTENSAS -->
+            <div class="section-header" style="border-left-color: #0ea5e9;"> <!-- Cor azul claro para Chuvas -->
+                <h2 class="section-title">CHUVAS INTENSAS</h2>
+                <span class="badge badge-warning">{{ chuvas|length }} Registros</span>
+            </div>
+            <div class="occurrence-list">
+                {% if chuvas %}
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Talão</th>
+                                <th>Natureza</th>
+                                <th>Endereço</th>
+                                <th>Prioridade</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in chuvas %}
+                            <tr>
+                                <td>{{ (c.data_hora or '').split('T')[0].split('-')[::-1] | join('/') }}</td>
+                                <td>{{ c.talao_numero or '-' }}</td>
+                                <td><strong>{{ chuvas_nature_map[c.natureza_codigo] if chuvas_nature_map and
+                                        c.natureza_codigo in chuvas_nature_map else (c.natureza_codigo or '-')
+                                        }}</strong></td>
+                                <td>
+                                    <div
+                                        style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        {{ c.endereco or '-' }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge"
+                                        style="background: {{ '#fecca4' if c.prioridade == 'ALTA' else '#f3f4f6' }}; color: {{ '#c2410c' if c.prioridade == 'ALTA' else '#374151' }};">
+                                        {{ c.prioridade }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn-secondary btn-sm btn-view"
+                                        onclick="openChuvasDetails(chuvasData[{{ loop.index0 }}])"
+                                        style="padding: 0.25rem 0.5rem;">Ver</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">Nenhuma ocorrência de Chuva registrada.</div>
+                {% endif %}
+            </div>
+
+            <hr style="border: 0; border-top: 2px dashed rgba(255,255,255,0.3); margin: 3rem 0;">
+
+            <!-- SECTION: RAIA -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">R.A.I.A</h2>
+                    <span class="badge badge-warning">{{ raias|length }} Registros</span>
+                </div>
+                <div class="occurrence-list">
+                    {% if raias %}
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Data</th>
+                                    <th>Natureza</th>
+                                    <th>Local</th>
+                                    <th>Responsável</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for oco in raias %}
+                                <tr>
+                                    <td title="{{ oco.id }}">
+                                        <span style="font-family: monospace;">{{ oco.id[:8] if oco.id else '-' }}</span>
+                                    </td>
+                                    <td>
+                                        {% if oco.created_at %}
+                                        {% set created_date = oco.created_at.split('T')[0] %}
+                                        {{ created_date.split('-')[::-1] | join('/') }}
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td> <!-- Formatar data no backend ou JS se preferir -->
+                                    <td>
+                                        <strong>{{ raia_nature_map[oco.nature_id] if raia_nature_map and oco.nature_id
+                                            in
+                                            raia_nature_map else oco.nature_id }}</strong>
+                                    </td>
+                                    <td>{{ oco.manual_location or oco.address }}</td>
+                                    <td>{{ oco.responsible_name or '-' }}</td>
+                                    <td><span class="badge badge-status-{{ (oco.status or 'NOVO') | lower }}">{{
+                                            'NOVO' if oco.status == 'OPEN' else oco.status }}</span></td>
+                                    <td>
+                                        <button class="btn-secondary btn-sm btn-view"
+                                            onclick='openDetails({{ oco | tojson | safe }})'
+                                            style="padding: 0.25rem 0.5rem;">Ver</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">Nenhuma ocorrência RAIA registrada.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <hr style="border: 0; border-top: 2px dashed rgba(255,255,255,0.3); margin: 3rem 0;">
+
+            <!-- Seção VULTO -->
+            <div class="section-header" style="border-left-color: #dc3545;"> <!-- Cor diferente para Vulto -->
+                <h2 class="section-title">OCORRÊNCIA DE VULTO</h2>
+                <span class="badge badge-warning">{{ vultos|length }} Registros</span>
+            </div>
+            <div class="occurrence-list">
+                {% if vultos %}
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Talão</th>
+                                <th>Natureza</th>
+                                <th>Município</th>
+                                <th>Detalhes</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for v in vultos %}
+                            <tr>
+                                <td>{{ (v.data_inicio or '').split('-')[::-1] | join('/') }}</td>
+                                <td>{{ v.talao_numero or '-' }}</td>
+                                <td>
+                                    <strong>{{ v.natureza_codigo }}</strong>
+                                </td>
+                                <td>{{ v.municipio_nome }}</td>
+                                <td>
+                                    {{ v.qtd_viaturas }} VTRs, {{ v.qtd_bombeiros }} Militares
+                                </td>
+                                <td>
+                                    <button class="btn-secondary btn-sm btn-view"
+                                        onclick='openVultoDetails({{ v | tojson | safe }})'
+                                        style="padding: 0.25rem 0.5rem;">Ver</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">Nenhuma ocorrência de Vulto registrada.</div>
+                {% endif %}
+            </div>
+
+            <hr style="border: 0; border-top: 2px dashed rgba(255,255,255,0.3); margin: 3rem 0;">
+
+
+
+
+
+        </main>
+
+        <!-- Side Panel -->
+        <div class="panel-overlay" id="panelOverlay"></div>
+        <div class="side-panel" id="sidePanel">
+            <div class="panel-header">
+                <h3 class="panel-title">Detalhes da Ocorrência</h3>
+                <button class="btn-close-panel" id="closePanel">&times;</button>
+            </div>
+            <div class="panel-content" id="panelBody">
+                <!-- Conteúdo dinâmico -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chuvasData = {{ chuvas | tojson if chuvas else '[]' }};
+        const sidePanel = document.getElementById('sidePanel');
+        const panelOverlay = document.getElementById('panelOverlay');
+        const closeBtn = document.getElementById('closePanel');
+        const panelBody = document.getElementById('panelBody');
+
+        function closeSidePanel() {
+            sidePanel.classList.remove('open');
+            panelOverlay.classList.remove('show');
+        }
+
+        closeBtn.onclick = closeSidePanel;
+        panelOverlay.onclick = closeSidePanel;
+
+
+
+        async function updateStatus(id) {
+            const selectEl = document.getElementById('statusSelect');
+            const newStatus = selectEl.value;
+
+            try {
+                const res = await fetch(`/api/admin/inconsistencias/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert('Status atualizado com sucesso!');
+                    // Força recarregamento ignorando cache
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('t', Date.now());
+                    window.location.href = url.toString();
+                } else {
+                    alert('Erro ao atualizar: ' + (data.error || 'Erro desconhecido'));
+                }
+            } catch (e) {
+                console.error("Erro ao atualizar status", e);
+                alert('Erro de conexão ao atualizar status');
+            }
+        }
+
+        async function updateRaiaStatus(id) {
+            const selectEl = document.getElementById('raiaStatusSelect');
+            const newStatus = selectEl.value;
+            try {
+                const res = await fetch(`/api/admin/occurrences/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    // Feedback visual ou reload
+                    // alert('Status atualizado!'); 
+                    // No reload necessário se quisermos apenas atualizar visualmente, mas o badge na lista principal ficaria desatualizado.
+                    // Vamos recarregar para garantir consistência.
+                    window.location.reload();
+                } else {
+                    alert('Erro ao atualizar: ' + (data.error || 'Erro desconhecido'));
+                }
+            } catch (e) {
+                console.error("Erro ao atualizar status RAIA", e);
+                alert('Erro de conexão');
+            }
+        }
+
+        function openDetails(oco) {
+            // Formatar fotos
+            let photosHtml = '';
+            if (oco.photos && oco.photos.length > 0) {
+                photosHtml = '<div class="photo-grid">';
+                oco.photos.forEach(url => {
+                    photosHtml += `<a href="${url}" target="_blank"><img src="${url}" class="photo-thumb"></a>`;
+                });
+                photosHtml += '</div>';
+            } else {
+                photosHtml = '<p class="detail-value" style="color: var(--text-muted); font-style: italic;">Nenhuma foto anexada.</p>';
+            }
+
+            // Formatar responsável
+            let respHtml = '<div class="detail-group"><div class="detail-value" style="color: var(--text-muted);">Sem responsável no local.</div></div>';
+            if (oco.has_responsible) {
+                respHtml = `
+                    <div class="detail-group">
+                        <div class="detail-label">Nome</div>
+                        <div class="detail-value">${oco.responsible_name || '-'}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Função / Cargo</div>
+                        <div class="detail-value">${oco.responsible_role || '-'}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Contato</div>
+                        <div class="detail-value">${oco.responsible_contact || '-'}</div>
+                    </div>
+                `;
+            }
+
+            panelBody.innerHTML = `
+                <div class="detail-group">
+                    <div class="detail-label">Elaborado por</div>
+                    <div class="detail-value">
+                        <div style="font-weight: 600; color: var(--primary-color);">${oco.elaborador_nome || 'Desconhecido'}</div>
+                        ${oco.elaborador_email ? `<div style="font-size: 0.9em; color: var(--text-muted);">${oco.elaborador_email}</div>` : ''}
+                    </div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">ID da Ocorrência</div>
+                    <div class="detail-value" style="font-family: monospace;" title="${oco.id}">${oco.id ? oco.id.substring(0, 8) : '-'}</div>
+                </div>
+                
+                <div class="detail-group">
+                    <div class="detail-label">Data e Hora</div>
+                    <div class="detail-value">${new Date(oco.created_at).toLocaleString('pt-BR')}</div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Natureza</div>
+                    <div class="detail-value" style="font-weight: 600;">${oco.nature_id || '-'}</div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">
+                        <select id="raiaStatusSelect" onchange="updateRaiaStatus('${oco.id}')" style="padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color); background: white; font-weight: 500;">
+                            <option value="NOVO" ${oco.status === 'NOVO' || oco.status === 'OPEN' ? 'selected' : ''}>NOVO</option>
+                            <option value="VERIFICANDO" ${oco.status === 'VERIFICANDO' ? 'selected' : ''}>VERIFICANDO</option>
+                            <option value="ENCERRADO" ${oco.status === 'ENCERRADO' || oco.status === 'CLOSED' ? 'selected' : ''}>ENCERRADO</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Localização</h4>
+                <div class="detail-group">
+                    <div class="detail-label">Endereço / Referência</div>
+                    <div class="detail-value">${oco.manual_location || oco.address || '-'}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Coordenadas</div>
+                    <div class="detail-value">
+                        ${(() => {
+                    let lat = oco.latitude;
+                    let lng = oco.longitude;
+
+                    // fallback
+                    if (!lat || !lng || String(lat) === 'None') {
+                        const text = oco.manual_location || oco.address || '';
+                        const match = text.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+                        if (match) {
+                            lat = match[1];
+                            lng = match[2];
+                        }
+                    }
+
+                    if (lat && lng && String(lat) !== 'None' && String(lng) !== 'None') {
+                        return `<a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" style="color: #0044cc; text-decoration: none; font-weight: 500;">
+                                    <i class="bi bi-geo-alt-fill"></i> ${lat}, ${lng} <i class="bi bi-box-arrow-up-right" style="font-size: 0.8em; margin-left: 4px;"></i>
+                                </a>`;
+                    }
+                    return '-';
+                })()}
+                    </div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Descrição</h4>
+                <div class="detail-group">
+                    <div class="detail-value" style="white-space: pre-wrap;">${oco.description || 'Sem descrição.'}</div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Responsável no Local</h4>
+                ${respHtml}
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Fotos</h4>
+                ${photosHtml}
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    ${oco.status !== 'ARCHIVED' ?
+                    `<button onclick="archiveOccurrence('${oco.id}')" class="btn-secondary" style="color: #d97706; border-color: #d97706;">
+                            <i class="bi bi-archive"></i> Arquivar
+                        </button>` :
+                    ''
+                }
+                    <button onclick="deleteOccurrence('${oco.id}')" class="btn-secondary" style="color: #dc2626; border-color: #dc2626;">
+                        <i class="bi bi-trash"></i> Excluir
+                    </button>
+                </div>
+            `;
+
+            sidePanel.classList.add('open');
+            panelOverlay.classList.add('show');
+        }
+
+        async function archiveOccurrence(id) {
+            if (!confirm('Tem certeza que deseja arquivar esta ocorrência?')) return;
+
+            try {
+                const res = await fetch(`/api/admin/occurrences/${id}/archive`, { method: 'PUT' });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert('Ocorrência arquivada com sucesso!');
+                    window.location.reload();
+                } else {
+                    alert('Erro ao arquivar: ' + data.error);
+                }
+            } catch (e) {
+                alert('Erro de conexão');
+            }
+        }
+
+        async function deleteOccurrence(id) {
+            if (!confirm('ATENÇÃO: Tem certeza que deseja EXCLUIR permanentemente esta ocorrência? Esta ação não pode ser desfeita.')) return;
+
+            try {
+                const res = await fetch(`/api/admin/occurrences/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert('Ocorrência excluída com sucesso!');
+                    window.location.reload();
+                } else {
+                    alert('Erro ao excluir: ' + data.error);
+                }
+            } catch (e) {
+                alert('Erro de conexão');
+            }
+        }
+
+        function openIncDetails(inc) {
+            // Reaproveitar o painel existente
+            const motivoDesc = inc.tipo === 'OPERACIONAL'
+                ? (inc.motivo_op_descricao || inc.motivo_op_codigo)
+                : (inc.motivo_tec_descricao || inc.motivo_tec_codigo);
+
+            let detalhesExtra = '';
+            if (inc.tipo === 'TECNICA') {
+                if (inc.motivo_tec_codigo === 'T4_193') {
+                    detalhesExtra = `
+                        <div class="detail-group">
+                            <div class="detail-label">Detalhes T4 (193)</div>
+                            <div class="detail-value">
+                                Origem: ${inc.t4_origem || '-'}<br>
+                                Operadora: ${inc.t4_operadora || '-'}<br>
+                                Número: ${inc.t4_numero || '-'}<br>
+                                Falha: ${inc.t4_falha || '-'}
+                            </div>
+                        </div>`;
+                } else if (inc.motivo_tec_codigo === 'T4_APP') {
+                    detalhesExtra = `
+                        <div class="detail-group">
+                            <div class="detail-label">Sistema Afetado</div>
+                            <div class="detail-value">${inc.t4_sistema_afetado || '-'}</div>
+                        </div>`;
+                }
+            }
+
+            const html = `
+                <div class="detail-group">
+                    <div class="detail-label">Elaborado por</div>
+                    <div class="detail-value">
+                        <div style="font-weight: 600; color: var(--primary-color);">${inc.elaborador_nome || 'Desconhecido'}</div>
+                        ${inc.elaborador_email ? `<div style="font-size: 0.9em; color: var(--text-muted);">${inc.elaborador_email}</div>` : ''}
+                    </div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">ID do Registro</div>
+                    <div class="detail-value" style="font-family: monospace;" title="${inc.id}">${inc.id ? inc.id.substring(0, 8) : '-'}</div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Data Ocorrência</div>
+                    <div class="detail-value">${inc.data_ocorrencia ? inc.data_ocorrencia.split('-').reverse().join('/') : '-'}</div>
+                </div>
+                
+                <div class="detail-group">
+                    <div class="detail-label">Número do Talão</div>
+                    <div class="detail-value">${inc.talao_numero || 'N/A'}</div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Tipo</div>
+                    <div class="detail-value">
+                        <span class="badge badge-warning" style="background: ${inc.tipo === 'OPERACIONAL' ? '#dbeafe' : '#ffedd5'}; color: ${inc.tipo === 'OPERACIONAL' ? '#1e40af' : '#9a3412'}; font-size: 1em;">
+                            ${inc.tipo}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Motivo</div>
+                    <div class="detail-value">${motivoDesc}</div>
+                </div>
+
+                ${detalhesExtra}
+
+                <div class="detail-group">
+                    <div class="detail-label">Observações</div>
+                    <div class="detail-value" style="white-space: pre-wrap;">${inc.observacao || 'Sem observações.'}</div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <div class="detail-group">
+                    <div class="detail-label">Status Atual</div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="statusSelect" class="detail-value" style="flex: 1; padding: 8px; border-radius: 4px; border: 1px solid #ccc; background-color: #f8fafc;">
+                            <option value="NOVO" ${inc.status === 'NOVO' || !inc.status ? 'selected' : ''}>NOVO</option>
+                            <option value="ABERTO" ${inc.status === 'ABERTO' ? 'selected' : ''}>ABERTO</option>
+                            <option value="VERIFICANDO" ${inc.status === 'VERIFICANDO' ? 'selected' : ''}>VERIFICANDO</option>
+                            <option value="ENCERRADO" ${inc.status === 'ENCERRADO' ? 'selected' : ''}>ENCERRADO</option>
+                        </select>
+                        <button onclick="updateStatus('${inc.id}')" class="btn-secondary" style="background: var(--primary-color); color: white; border: none; padding: 0.5rem 1rem;">
+                            Salvar
+                        </button>
+                    </div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    ${inc.status !== 'ARCHIVED' ?
+                    `<button onclick="archiveInconsistency('${inc.id}')" class="btn-secondary" style="color: #d97706; border-color: #d97706;">
+                            <i class="bi bi-archive"></i> Arquivar
+                        </button>` :
+                    ''
+                }
+                    <button onclick="deleteInconsistency('${inc.id}')" class="btn-secondary" style="color: #dc2626; border-color: #dc2626;">
+                        <i class="bi bi-trash"></i> Excluir Registro
+                    </button>
+                </div>
+            `;
+
+            panelBody.innerHTML = html;
+            sidePanel.classList.add('open');
+            panelOverlay.classList.add('show');
+        }
+
+        async function deleteInconsistency(id) {
+            if (!confirm('ATENÇÃO: Tem certeza que deseja EXCLUIR permanentemente esta inconsistência?')) return;
+
+            try {
+                // Reutilizando a API de delete que criamos anteriormente
+                const res = await fetch(`/api/inconsistencias/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert('Registro excluído com sucesso!');
+                    window.location.reload();
+                } else {
+                    alert('Erro ao excluir: ' + (data.error || 'Erro desconhecido'));
+                }
+            } catch (e) {
+                alert('Erro de conexão ao excluir.');
+            }
+        }
+
+        async function archiveInconsistency(id) {
+            if (!confirm('Tem certeza que deseja arquivar esta inconsistência?')) return;
+
+            try {
+                const res = await fetch(`/api/admin/inconsistencias/${id}/archive`, { method: 'PUT' });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert('Registro arquivado com sucesso!');
+                    window.location.reload();
+                } else {
+                    alert('Erro ao arquivar: ' + (data.error || 'Erro desconhecido'));
+                }
+            } catch (e) {
+                alert('Erro de conexão ao arquivar.');
+            }
+        }
+
+        function openVultoDetails(v) {
+            const html = `
+                <div class="detail-group">
+                    <div class="detail-label">Elaborado por</div>
+                    <div class="detail-value">
+                        <div style="font-weight: 600; color: var(--primary-color);">${v.elaborador_nome || 'Desconhecido'}</div>
+                        ${v.elaborador_email ? `<div style="font-size: 0.9em; color: var(--text-muted);">${v.elaborador_email}</div>` : ''}
+                    </div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">ID do Vulto</div>
+                    <div class="detail-value" style="font-family: monospace;" title="${v.id}">${v.id ? v.id.substring(0, 8) : '-'}</div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Natureza & Local</div>
+                    <div class="detail-value">
+                        <strong>${v.natureza_codigo}</strong><br>
+                        ${v.municipio_nome} - ${v.bairro}<br>
+                        ${v.endereco || ''}
+                    </div>
+                </div>
+                
+                <div class="detail-group">
+                    <div class="detail-label">Data/Hora</div>
+                    <div class="detail-value">${v.data_inicio ? v.data_inicio.split('-').reverse().join('/') : '-'} às ${v.hora_inicio || '-'}</div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Recursos</div>
+                    <div class="detail-value">
+                        Viaturas: <strong>${v.qtd_viaturas}</strong><br>
+                        Militares: <strong>${v.qtd_bombeiros}</strong>
+                    </div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Encarregado</div>
+                    <div class="detail-value">${v.encarregado_posto} ${v.encarregado_nome}</div>
+                </div>
+
+                 <div class="detail-group">
+                    <div class="detail-label">Histórico Inicial</div>
+                     <div class="detail-value" style="font-size:0.9em; white-space: pre-wrap;">${v.historico_inicial || '-'}</div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label" style="display:flex; justify-content:space-between; align-items:center;">
+                        Texto Gerado
+                         <button onclick="copiarTextoVulto()" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:0.9em;">
+                            <i class="bi bi-clipboard"></i> Copiar
+                        </button>
+                    </div>
+                    <textarea id="texto_vulto_hidden" style="display:none;">${v.generated_text || ''}</textarea>
+                    <div class="detail-value" style="font-family: monospace; background: #f8fafc; padding: 10px; border-radius: 4px; font-size: 0.8em; white-space: pre-wrap; border: 1px solid #e2e8f0; max-height: 200px; overflow-y: auto;">${v.generated_text || 'Sem texto.'}</div>
+                </div>
+            `;
+
+            panelBody.innerHTML = html;
+            sidePanel.classList.add('open');
+            panelOverlay.classList.add('show');
+        }
+
+        function copiarTextoVulto() {
+            const txt = document.getElementById('texto_vulto_hidden').value;
+            navigator.clipboard.writeText(txt).then(() => {
+                alert('Texto copiado!');
+            });
+        }
+
+        function openChuvasDetails(c) {
+            panelBody.innerHTML = `
+                <div class="detail-group">
+                    <div class="detail-label">Elaborado por</div>
+                    <div class="detail-value">
+                        <div style="font-weight: 600; color: var(--primary-color);">${c.elaborador_nome || 'Desconhecido'}</div>
+                        ${c.elaborador_email ? `<div style="font-size: 0.9em; color: var(--text-muted);">${c.elaborador_email}</div>` : ''}
+                    </div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">ID</div>
+                    <div class="detail-value" style="font-family: monospace;" title="${c.id}">${c.id ? c.id.substring(0, 8) : '-'}</div>
+                </div>
+                
+                <div class="detail-group">
+                    <div class="detail-label">Data e Hora</div>
+                    <div class="detail-value">${c.data_hora ? new Date(c.data_hora).toLocaleString('pt-BR') : '-'}</div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Talão</div>
+                    <div class="detail-value" style="font-weight: 600;">${c.talao_numero || '-'}</div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Natureza</div>
+                    <div class="detail-value">
+                        ${(() => {
+                    const map = {
+                        'A1': 'A1 - Árvore em Risco',
+                        'A2': 'A2 - Poda Emergencial',
+                        'A3': 'A3 - Risco Elétrico',
+                        'A4': 'A4 - Obstrução de Via',
+                        'A5': 'A5 - Outras / Alagamento'
+                    };
+                    return map[c.natureza_codigo] || c.natureza_codigo || '-';
+                })()}
+                    </div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Endereço</div>
+                    <div class="detail-value">${c.endereco || '-'}</div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Prioridade</div>
+                     <span class="badge" style="font-size: 1em;">${c.prioridade || '-'}</span>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <div class="detail-group">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value"><span class="badge badge-info">${c.status || 'ESPERA'}</span></div>
+                </div>
+
+                 <div class="detail-group">
+                    <div class="detail-label">Resultado</div>
+                    <div class="detail-value">${c.resultado || '-'}</div>
+                </div>
+
+                 <div class="detail-group">
+                    <div class="detail-label">Limpeza de Via</div>
+                    <div class="detail-value">${c.limpeza_via || '-'}</div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+                
+                <div class="detail-group">
+                    <div class="detail-label">Observação / Município</div>
+                    <div class="detail-value" style="white-space: pre-wrap;">${c.observacao || '-'}</div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                     <button onclick="if(confirm('Tem certeza que deseja excluir permanentemente esta ocorrência?')) { deleteOcorrenciaChuva('${c.id}'); }" 
+                             class="btn-secondary" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;">
+                             <i class="bi bi-trash"></i> Excluir
+                     </button>
+                </div>
+            `;
+
+            sidePanel.classList.add('open');
+            panelOverlay.classList.add('show');
+        }
+
+        async function deleteOcorrenciaChuva(id) {
+            try {
+                const res = await fetch(`/api/admin/chuvas/${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert('Ocorrência excluída com sucesso.');
+                    location.reload();
+                } else {
+                    alert('Erro ao excluir: ' + (data.error || 'Erro desconhecido'));
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Erro de conexão ao excluir.');
+            }
+        }
+
+        // --- FIM FUNCOES ---
+    </script>
+</body>
+
+</html>

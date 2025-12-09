@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAIA - Cadastro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="signup-container">
+        <div class="signup-card">
+            <div class="signup-header">
+                <div class="logo">BOMBEIROS CBI-1</div>
+                <p>Crie sua conta</p>
+            </div>
+            <form id="signup-form">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label for="full_name">Nome Completo</label>
+                        <input type="text" id="full_name" name="full_name" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="war_name">Nome de Guerra</label>
+                        <input type="text" id="war_name" name="war_name" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="re">R.E. (com dígito)</label>
+                        <input type="text" id="re" name="re" placeholder="Ex: 123456-7" pattern="[0-9]{6}-[0-9]{1}"
+                            title="Formato obrigatório: 123456-7 (6 números, traço, 1 dígito)" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rank">Posto/Graduação</label>
+                        <select id="rank" name="rank" required>
+                            <option value="">Selecione...</option>
+                            <option value="SD">SD PM</option>
+                            <option value="CB">CB PM</option>
+                            <option value="3ºSGT">3ºSGT PM</option>
+                            <option value="2ºSGT">2ºSGT PM</option>
+                            <option value="1ºSGT">1ºSGT PM</option>
+                            <option value="SUB TEN">SUB TEN PM</option>
+                            <option value="2ºTEN">2ºTEN PM</option>
+                            <option value="1ºTEN">1ºTEN PM</option>
+                            <option value="CAP">CAP PM</option>
+                            <option value="MAJ">MAJ PM</option>
+                            <option value="TEN CEL">TEN CEL PM</option>
+                            <option value="CEL">CEL PM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="opm_id">OPM</label>
+                    <select id="opm_id" name="opm_id" required>
+                        <option value="">Carregando OPMs...</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contact">Contato (Celular com DDD)</label>
+                        <input type="tel" id="contact" name="contact" placeholder="Ex: 18996549231"
+                            pattern="[0-9]{10,11}" title="Digite apenas números, incluindo DDD (ex: 18996549231)"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">E-mail Funcional</label>
+                        <input type="email" id="email" name="email" placeholder="nome@policiamilitar.sp.gov.br"
+                            pattern=".+@policiamilitar\.sp\.gov\.br"
+                            title="O e-mail deve ser do domínio @policiamilitar.sp.gov.br" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Senha</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirmar Senha</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">Cadastrar</button>
+            </form>
+            <div class="login-footer">
+                <p>Já tem uma conta? <a href="{{ url_for('login_page') }}">Fazer Login</a></p>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Carregar OPMs
+        fetch('/api/opms')
+            .then(r => r.json())
+            .then(data => {
+                const select = document.getElementById('opm_id');
+                select.innerHTML = '<option value="">Selecione sua OPM...</option>';
+                data.forEach(opm => {
+                    const option = document.createElement('option');
+                    option.value = opm.id;
+                    option.textContent = `${opm.EB} (${opm.GB})`;
+                    select.appendChild(option);
+                });
+            });
+
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            if (data.password !== data.confirm_password) {
+                alert('As senhas não conferem!');
+                return;
+            }
+
+            const btn = e.target.querySelector('button');
+            const originalText = btn.textContent;
+            btn.textContent = 'Cadastrando...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('Cadastro realizado com sucesso! Faça login.');
+                    window.location.href = '/login';
+                } else {
+                    alert('Erro: ' + (result.error || 'Falha no cadastro'));
+                }
+            } catch (error) {
+                alert('Erro de conexão');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAIA - Minhas Ocorrências</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        /* Estilos específicos para esta página */
+        .page-layout {
+            display: flex;
+            height: calc(100vh - 70px);
+            /* Altura total menos header */
+            overflow: hidden;
+            position: relative;
+        }
+
+        .list-container {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            transition: margin-right 0.3s ease;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: fixed;
+            top: 70px;
+            /* Abaixo do header */
+            right: -500px;
+            /* Escondido inicialmente */
+            width: 500px;
+            height: calc(100vh - 70px);
+            background: white;
+            box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .side-panel.open {
+            right: 0;
+        }
+
+        .panel-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .btn-close-panel {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .btn-close-panel:hover {
+            color: var(--danger-color);
+        }
+
+        .panel-content {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .detail-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 0.5rem;
+        }
+
+        .photo-thumb {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .photo-thumb:hover {
+            transform: scale(1.05);
+        }
+
+        /* Overlay para mobile ou quando o painel abre */
+        .panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .panel-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                        Minhas Ocorrências</span></div>
+                <div class="user-menu">
+                    <a href="{{ url_for('elaborar_raia') }}" class="btn-secondary btn-sm">Voltar</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="page-layout">
+            <div class="list-container">
+                <div class="card" style="border: none; box-shadow: none; background: transparent;">
+                    <div class="card-header"
+                        style="padding-left: 0; padding-right: 0; background: transparent; border: none;">
+                        <h2 style="margin-bottom: 1rem; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Histórico
+                            de Ocorrências</h2>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Natureza</th>
+                                    <th>Local</th>
+                                    <th>Status</th>
+                                    <th style="text-align: right;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="occurrences-list">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 2rem;">Carregando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-overlay" id="panelOverlay"></div>
+
+            <div class="side-panel" id="sidePanel">
+                <div class="panel-header">
+                    <h3 class="panel-title">Detalhes da Ocorrência</h3>
+                    <button class="btn-close-panel" id="closePanel">&times;</button>
+                </div>
+                <div class="panel-content" id="panelBody">
+                    <!-- Conteúdo dinâmico -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidePanel = document.getElementById('sidePanel');
+            const panelOverlay = document.getElementById('panelOverlay');
+            const closeBtn = document.getElementById('closePanel');
+
+            function closeSidePanel() {
+                sidePanel.classList.remove('open');
+                panelOverlay.classList.remove('show');
+            }
+
+            closeBtn.onclick = closeSidePanel;
+            panelOverlay.onclick = closeSidePanel;
+
+            fetch('/api/raia/me')
+                .then(r => r.json())
+                .then(data => {
+                    const tbody = document.getElementById('occurrences-list');
+                    tbody.innerHTML = '';
+
+                    if (data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">Nenhuma ocorrência encontrada.</td></tr>';
+                        return;
+                    }
+
+                    data.forEach(oco => {
+                        const tr = document.createElement('tr');
+                        const date = new Date(oco.created_at).toLocaleString('pt-BR');
+
+                        tr.innerHTML = `
+                            <td>
+                                <div style="font-weight: 500;">${date.split(' ')[0]}</div>
+                                <div style="font-size: 0.85em; color: var(--text-muted);">${date.split(' ')[1]}</div>
+                            </td>
+                            <td>${oco.nature_id || '-'}</td>
+                            <td><div style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${oco.manual_location || oco.address || 'GPS'}</div></td>
+                            <td><span class="badge badge-${oco.status === 'OPEN' ? 'warning' : 'success'}">${oco.status}</span></td>
+                            <td style="text-align: right;">
+                                <button class="btn-secondary btn-sm btn-view" style="border-radius: 50%; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;"><i class="bi bi-chevron-right"></i></button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+
+                        // Evento de clique na linha inteira ou botão
+                        tr.addEventListener('click', () => showDetails(oco));
+                        tr.style.cursor = 'pointer';
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('occurrences-list').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red; padding: 2rem;">Erro ao carregar dados.</td></tr>';
+                });
+
+            function showDetails(oco) {
+                const body = document.getElementById('panelBody');
+
+                // Formatar fotos
+                let photosHtml = '';
+                if (oco.photos && oco.photos.length > 0) {
+                    photosHtml = '<div class="photo-grid">';
+                    oco.photos.forEach(url => {
+                        photosHtml += `<a href="${url}" target="_blank"><img src="${url}" class="photo-thumb"></a>`;
+                    });
+                    photosHtml += '</div>';
+                } else {
+                    photosHtml = '<p class="detail-value" style="color: var(--text-muted); font-style: italic;">Nenhuma foto anexada.</p>';
+                }
+
+                // Formatar responsável
+                let respHtml = '<div class="detail-group"><div class="detail-value" style="color: var(--text-muted);">Sem responsável no local.</div></div>';
+                if (oco.has_responsible) {
+                    respHtml = `
+                        <div class="detail-group">
+                            <div class="detail-label">Nome</div>
+                            <div class="detail-value">${oco.responsible_name || '-'}</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-label">Função / Cargo</div>
+                            <div class="detail-value">${oco.responsible_role || '-'}</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-label">Contato</div>
+                            <div class="detail-value">${oco.responsible_contact || '-'}</div>
+                        </div>
+                    `;
+                }
+
+                body.innerHTML = `
+                    <div class="detail-group">
+                        <div class="detail-label">ID da Ocorrência</div>
+                        <div class="detail-value" style="font-family: monospace;">${oco.id}</div>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <div class="detail-label">Data e Hora</div>
+                        <div class="detail-value">${new Date(oco.created_at).toLocaleString('pt-BR')}</div>
+                    </div>
+
+                    <div class="detail-group">
+                        <div class="detail-label">Natureza</div>
+                        <div class="detail-value" style="font-weight: 600;">${oco.nature_id || '-'}</div>
+                    </div>
+
+                    <div class="detail-group">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value"><span class="badge badge-${oco.status === 'OPEN' ? 'warning' : 'success'}">${oco.status}</span></div>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                    <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Localização</h4>
+                    <div class="detail-group">
+                        <div class="detail-label">Endereço / Referência</div>
+                        <div class="detail-value">${oco.manual_location || oco.address || '-'}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Coordenadas</div>
+                            ${(() => {
+                        let lat = oco.latitude;
+                        let lng = oco.longitude;
+
+                        // Se não tiver coordenadas explícitas, tentar extrair do endereço/local manual
+                        if (!lat || !lng || String(lat) === 'None') {
+                            const text = oco.manual_location || oco.address || '';
+                            // Regex para procurar padrão "lat, long" (ex: -22.123, -47.456)
+                            const match = text.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+                            if (match) {
+                                lat = match[1];
+                                lng = match[2];
+                            }
+                        }
+
+                        if (lat && lng && String(lat) !== 'None' && String(lng) !== 'None') {
+                            return `<a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" style="color: #0044cc; text-decoration: none; font-weight: 500;">
+                                        <i class="bi bi-geo-alt-fill"></i> ${lat}, ${lng} <i class="bi bi-box-arrow-up-right" style="font-size: 0.8em; margin-left: 4px;"></i>
+                                    </a>`;
+                        }
+                        return '-';
+                    })()}
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                    <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Descrição</h4>
+                    <div class="detail-group">
+                        <div class="detail-value" style="white-space: pre-wrap;">${oco.description || 'Sem descrição.'}</div>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                    <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Responsável no Local</h4>
+                    ${respHtml}
+
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                    <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Fotos</h4>
+                    ${photosHtml}
+
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                        <button onclick="deleteMyOccurrence('${oco.id}')" class="btn-secondary" style="color: #dc2626; border-color: #dc2626;">
+                            <i class="bi bi-trash"></i> Excluir
+                        </button>
+                    </div>
+                `;
+
+                sidePanel.classList.add('open');
+                panelOverlay.classList.add('show');
+            }
+
+        });
+
+        async function deleteMyOccurrence(id) {
+            if (!confirm('ATENÇÃO: Tem certeza que deseja excluir esta ocorrência?')) return;
+
+            try {
+                const res = await fetch(`/api/raia/me/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert('Ocorrência excluída com sucesso!');
+                    window.location.reload();
+                } else {
+                    alert('Erro ao excluir: ' + (data.error || 'Erro desconhecido'));
+                }
+            } catch (e) {
+                alert('Erro de conexão');
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHUVAS - Meus Registros</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<style>
+    /* Overlay e Sidebar */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .overlay.active {
+        display: block;
+        opacity: 1;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: -500px;
+        width: 450px;
+        height: 100%;
+        background: white;
+        z-index: 1000;
+        box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease-in-out;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar.active {
+        right: 0;
+    }
+
+    @media (max-width: 500px) {
+        .sidebar {
+            width: 100%;
+            right: -100%;
+        }
+    }
+
+    .sidebar-header {
+        padding: 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8fafc;
+    }
+
+    .sidebar-body {
+        padding: 20px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .sidebar-footer {
+        padding: 20px;
+        border-top: 1px solid #e2e8f0;
+        background: #f8fafc;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .detail-row {
+        margin-bottom: 15px;
+    }
+
+    .detail-label {
+        font-size: 0.85em;
+        color: #64748b;
+        font-weight: 500;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .detail-value {
+        font-size: 1em;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .edit-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-family: inherit;
+    }
+
+    .edit-input:disabled {
+        background: transparent;
+        border: none;
+        padding: 0;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    /* Estilo para quando estiver editando ficar com fundo branco e borda */
+    .editing .edit-input {
+        background: white;
+        border: 1px solid #cbd5e1;
+        padding: 8px;
+    }
+</style>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">BOMBEIROS CBI-1 <span>| Chuvas - Histórico</span></div>
+                <div class="user-menu">
+                    <a href="{{ url_for('chuvas_intensas') }}" class="btn-secondary btn-sm">Voltar</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="app-content">
+            <div class="card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>
+                        {% if is_gb_view %}
+                        Ocorrências - 7º/15º/16º/19º GB
+                        {% else %}
+                        Minhas Ocorrências
+                        {% endif %}
+                    </h2>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="{{ url_for('chuvas_intensas_selecao') }}" class="btn-secondary btn-sm">
+                            <i class="bi bi-arrow-left"></i> Voltar Seleção
+                        </a>
+                        <a href="{{ url_for('chuvas_intensas_novo') }}" class="btn-primary btn-sm">
+                            <i class="bi bi-plus-lg"></i> Novo Registro
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                                <th style="padding: 12px;">Data</th>
+                                <th style="padding: 12px;">Talão</th>
+                                <th style="padding: 12px;">Responsável</th>
+                                <th style="padding: 12px;">Natureza</th>
+                                <th style="padding: 12px;">Endereço</th>
+                                <th style="padding: 12px;">Status</th>
+                                <th style="padding: 12px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if items %}
+                            {% for item in items %}
+                            <tr style="border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s;"
+                                onclick="openSidebar(itemsData[{{ loop.index0 }}])"
+                                onmouseover="this.style.background='#f1f5f9'"
+                                onmouseout="this.style.background='white'">
+                                <td style="padding: 12px;">
+                                    {{ item.data_hora and item.data_hora.split('T')[0].split('-')[::-1] | join('/') }}
+                                    <small style="color: #64748b; display: block;">{{ item.data_hora and
+                                        item.data_hora.split('T')[1][:5] }}</small>
+                                </td>
+                                <td style="padding: 12px;">{{ item.talao_numero or '-' }}</td>
+                                <td style="padding: 12px;">
+                                    <span class="badge"
+                                        style="background: {{ '#dbeafe' if item.tipo_atendimento == 'BOMBEIROS' else '#f3f4f6' }}; color: {{ '#1e40af' if item.tipo_atendimento == 'BOMBEIROS' else '#374151' }}; padding: 2px 8px; border-radius: 4px; font-size: 0.85em;">
+                                        {{ item.tipo_atendimento }}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px;">
+                                    {% set naturezas = {
+                                    'A1': 'A1 - Árvore em Risco',
+                                    'A2': 'A2 - Poda Emergencial',
+                                    'A3': 'A3 - Risco Elétrico',
+                                    'A4': 'A4 - Obstrução de Via',
+                                    'A5': 'A5 - Outras / Alagamento'
+                                    } %}
+                                    {{ naturezas[item.natureza_codigo] if item.natureza_codigo in naturezas else
+                                    (item.natureza_codigo or '-') }}
+                                </td>
+                                <td style="padding: 12px;">
+                                    <div
+                                        style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        {{ item.endereco or '-' }}
+                                    </div>
+                                </td>
+                                <td style="padding: 12px;">
+                                    <span class="badge"
+                                        style="
+                                            background: {% if item.status == 'ATENDIDO' %}#dcfce7{% elif item.status == 'EM_ATENDIMENTO' %}#fef9c3{% else %}#f1f5f9{% endif %}; 
+                                            color: {% if item.status == 'ATENDIDO' %}#166534{% elif item.status == 'EM_ATENDIMENTO' %}#854d0e{% else %}#475569{% endif %};
+                                            padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: 600;">
+                                        {{ item.status }}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px; text-align: right;">
+                                    <button
+                                        style="padding: 6px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; color: #475569; font-size: 0.85em; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                        Ver / Editar
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="7" style="padding: 24px; text-align: center; color: var(--text-muted);">
+                                    Nenhum registro encontrado.
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3 style="margin: 0; font-size: 1.2em;">Detalhes da Ocorrência</h3>
+            <button onclick="closeSidebar()"
+                style="background: none; border: none; font-size: 1.5em; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <div class="sidebar-body" id="sidebar-form">
+            <input type="hidden" id="edit_id">
+
+            <div class="detail-row">
+                <label class="detail-label">Talão</label>
+                <input type="text" id="edit_talao" class="edit-input" disabled>
+            </div>
+
+            <div class="detail-row">
+                <label class="detail-label">Endereço</label>
+                <textarea id="edit_endereco" class="edit-input" rows="3" disabled></textarea>
+            </div>
+
+            <div class="detail-row">
+                <label class="detail-label">Status</label>
+                <select id="edit_status" class="edit-input" disabled>
+                    <option value="ESPERA">Em Espera</option>
+                    <option value="AGENDADA">Agendada</option>
+                    <option value="EM_ATENDIMENTO">Em Atendimento</option>
+                    <option value="ATENDIDO">Atendido / Finalizado</option>
+                </select>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+
+            <div class="detail-row">
+                <label class="detail-label">Natureza</label>
+                <select id="edit_natureza" class="edit-input" disabled>
+                    <option value="A1">A1 - Árvore em Risco/Queda</option>
+                    <option value="A2">A2 - Poda Emergencial</option>
+                    <option value="A3">A3 - Risco Elétrico</option>
+                    <option value="A4">A4 - Obstrução de Via</option>
+                    <option value="A5">A5 - Outras / Alagamento</option>
+                </select>
+            </div>
+
+            <div class="detail-row">
+                <label class="detail-label">Prioridade</label>
+                <select id="edit_prioridade" class="edit-input" disabled>
+                    <option value="ALTA">Alta</option>
+                    <option value="MEDIA">Média</option>
+                    <option value="BAIXA">Baixa</option>
+                    <option value="NORMAL">Normal</option>
+                </select>
+            </div>
+
+            <div class="detail-row">
+                <label class="detail-label">Resultado</label>
+                <select id="edit_resultado" class="edit-input" disabled>
+                    <option value="NAO_SE_APLICA">Não se aplica</option>
+                    <option value="SUPRESSAO">Supressão</option>
+                    <option value="PODA">Poda</option>
+                    <option value="VISTORIA">Vistoria</option>
+                </select>
+            </div>
+
+            <div class="detail-row">
+                <label class="detail-label">Observação</label>
+                <textarea id="edit_observacao" class="edit-input" rows="4" disabled></textarea>
+            </div>
+
+            <!-- Outros campos podem ser adicionados aqui conforme necessidade -->
+
+        </div>
+        <div class="sidebar-footer"
+            style="padding: 24px; justify-content: space-between; align-items: center; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+            <button id="btn-delete" type="button" onclick="deleteItem()"
+                style="padding: 12px 20px; border-radius: 8px; border: none; background: #fee2e2; color: #dc2626; font-weight: 600; font-size: 1em; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-trash" style="font-size: 1.1em;"></i> Excluir
+            </button>
+
+            <div style="display: flex; gap: 12px;">
+                <button id="btn-edit" class="btn-primary" onclick="enableEdit()"
+                    style="padding: 12px 30px; border-radius: 8px; font-size: 1em; font-weight: 600; background: #2563eb; color: white; border: none; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-pencil"></i> Editar
+                </button>
+
+                <button id="btn-cancel" class="btn-secondary" onclick="disableEdit()"
+                    style="display: none; padding: 12px 24px; border-radius: 8px; font-size: 1em; font-weight: 600; background: #e2e8f0; color: #475569; border: none; cursor: pointer;">
+                    Cancelar
+                </button>
+                <button id="btn-save" class="btn-primary" onclick="saveEdit()"
+                    style="display: none; padding: 12px 30px; border-radius: 8px; font-size: 1em; font-weight: 600; background: #16a34a; color: white; border: none; box-shadow: 0 4px 6px rgba(22, 163, 74, 0.2); cursor: pointer; transition: all 0.2s;">
+                    <i class="bi bi-check-lg" style="margin-right: 5px;"></i> Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const itemsData = {{ items | tojson }};
+        const isGbView = {{ 'true' if is_gb_view else 'false' }}; // Recebe booleano do backend
+        const overlay = document.getElementById('overlay');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarForm = document.getElementById('sidebar-form');
+        let currentItem = null;
+
+        function openSidebar(item) {
+            currentItem = item;
+
+            // Popula campos
+            document.getElementById('edit_id').value = item.id;
+            document.getElementById('edit_talao').value = item.talao_numero || '';
+            document.getElementById('edit_endereco').value = item.endereco || '';
+            document.getElementById('edit_status').value = item.status || 'ESPERA';
+            document.getElementById('edit_natureza').value = item.natureza_codigo || '';
+            document.getElementById('edit_prioridade').value = item.prioridade || 'MEDIA';
+            document.getElementById('edit_resultado').value = item.resultado || 'NAO_SE_APLICA';
+            document.getElementById('edit_observacao').value = item.observacao || '';
+
+            // Se for GB view, esconde botão de excluir
+            if (isGbView) {
+                document.getElementById('btn-delete').style.visibility = 'hidden';
+            } else {
+                document.getElementById('btn-delete').style.visibility = 'visible';
+            }
+
+            // Reseta estado visual
+            disableEdit();
+
+            // Mostra
+            overlay.classList.add('active');
+            sidebar.classList.add('active');
+        }
+
+        function closeSidebar() {
+            overlay.classList.remove('active');
+            sidebar.classList.remove('active');
+        }
+
+        function enableEdit() {
+            sidebarForm.classList.add('editing');
+            const inputs = sidebarForm.querySelectorAll('.edit-input');
+
+            if (isGbView) {
+                // Modo GB: Apenas Status e Resultado editáveis
+                document.getElementById('edit_status').disabled = false;
+                document.getElementById('edit_resultado').disabled = false;
+
+                // Outros campos continuam disabled
+            } else {
+                // Modo Minhas: Tudo editável
+                inputs.forEach(input => input.disabled = false);
+            }
+
+            document.getElementById('btn-edit').style.display = 'none';
+            document.getElementById('btn-delete').style.display = 'none';
+            document.getElementById('btn-save').style.display = 'block';
+            document.getElementById('btn-cancel').style.display = 'block';
+        }
+
+        function disableEdit() {
+            sidebarForm.classList.remove('editing');
+            const inputs = sidebarForm.querySelectorAll('.edit-input');
+            inputs.forEach(input => input.disabled = true);
+
+            document.getElementById('btn-edit').style.display = 'block';
+            document.getElementById('btn-delete').style.display = 'block'; // Mostra excluir ao cancelar
+            document.getElementById('btn-save').style.display = 'none';
+            document.getElementById('btn-cancel').style.display = 'none';
+
+            // Reverte valores (opcional, aqui apenas visual)
+            if (currentItem) {
+                // Se cancelou, poderia repopular com currentItem para desfazer mudanças nao salvas
+                document.getElementById('edit_talao').value = currentItem.talao_numero || '';
+                // ... etc
+            }
+        }
+
+        async function saveEdit() {
+            const id = document.getElementById('edit_id').value;
+            const btnSave = document.getElementById('btn-save');
+            const originalText = btnSave.textContent;
+
+            btnSave.textContent = 'Salvando...';
+            btnSave.disabled = true;
+
+            const payload = {
+                talao_numero: document.getElementById('edit_talao').value,
+                endereco: document.getElementById('edit_endereco').value,
+                status: document.getElementById('edit_status').value,
+                natureza_codigo: document.getElementById('edit_natureza').value,
+                prioridade: document.getElementById('edit_prioridade').value,
+                resultado: document.getElementById('edit_resultado').value,
+                observacao: document.getElementById('edit_observacao').value,
+                // Mantemos os outros campos como o original se não tem input aqui
+                // Mas a rota update só atualiza o que enviamos, então ok.
+            };
+
+            try {
+                const res = await fetch(`/api/chuvas/update/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const json = await res.json();
+
+                if (json.success) {
+                    alert('Atualizado com sucesso!');
+                    location.reload(); // Recarrega para atualizar tabela
+                } else {
+                    alert('Erro ao atualizar: ' + (json.error || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro de conexão ao salvar.');
+            } finally {
+                btnSave.textContent = originalText;
+                btnSave.disabled = false;
+            }
+        }
+
+        async function deleteItem() {
+            if (!confirm('Tem certeza que deseja EXCLUIR este registro? Esta ação não pode ser desfeita.')) return;
+
+            const id = document.getElementById('edit_id').value;
+            const btnDelete = document.getElementById('btn-delete');
+            const originalText = btnDelete.innerHTML;
+
+            btnDelete.innerHTML = 'Excluindo...';
+            btnDelete.disabled = true;
+
+            try {
+                const res = await fetch(`/api/chuvas/delete/${id}`, {
+                    method: 'DELETE'
+                });
+                const json = await res.json();
+
+                if (json.success) {
+                    alert('Registro excluído com sucesso.');
+                    location.reload();
+                } else {
+                    alert('Erro ao excluir: ' + (json.error || 'Erro desconhecido'));
+                    btnDelete.innerHTML = originalText;
+                    btnDelete.disabled = false;
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro de conexão.');
+                btnDelete.innerHTML = originalText;
+                btnDelete.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

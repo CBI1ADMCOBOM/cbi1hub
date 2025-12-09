@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAIA - Menu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .menu-options {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .option-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-color);
+            width: 250px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .option-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                        RAIA</span></div>
+                <div class="user-menu">
+                    <a href="{{ url_for('dashboard') }}" class="btn-secondary btn-sm">Voltar ao Início</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="app-content">
+            <div style="text-align: center; margin-bottom: 2rem; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                <h2 style="font-weight: 700; font-size: 1.8rem;">O que deseja fazer?</h2>
+                <p style="opacity: 0.9;">Selecione uma opção abaixo.</p>
+            </div>
+
+            <div class="menu-options">
+                <a href="{{ url_for('elaborar_raia_novo') }}" class="option-card">
+                    <i class="bi bi-plus-circle option-icon"></i>
+                    <div class="option-title">GERAR</div>
+                    <p style="margin-top: 0.5rem; color: var(--text-muted);">Registrar nova ocorrência</p>
+                </a>
+
+                <a href="{{ url_for('elaborar_raia_listar') }}" class="option-card">
+                    <i class="bi bi-list-ul option-icon"></i>
+                    <div class="option-title">VISUALIZAR</div>
+                    <p style="margin-top: 0.5rem; color: var(--text-muted);">Minhas ocorrências</p>
+                </a>
+            </div>
+
+            <div style="display: flex; justify-content: center; margin-top: 2rem;">
+                <a href="#" onclick="return false;" style="
+                    background: rgba(255, 255, 255, 0.9);
+                    padding: 0.75rem 2rem;
+                    border-radius: 8px;
+                    text-decoration: none;
+                    color: var(--primary-color);
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    transition: transform 0.2s;
+                    width: 100%;
+                    max-width: 300px;
+                    justify-content: center;
+                " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    <i class="bi bi-book"></i> ORDEM DE SERVIÇO Nº PM3-002/02/14-CIRCULAR
+                </a>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

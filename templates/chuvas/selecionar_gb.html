@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHUVAS - Selecionar Visualização</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .selection-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .btn-gb {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            color: #1e293b;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-gb:hover {
+            background: #e0f2fe;
+            border-color: #3b82f6;
+            color: #0369a1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-meus {
+            background: #2563eb;
+            color: white;
+            border: 1px solid #2563eb;
+        }
+
+        .btn-meus:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container" style="justify-content: center; min-height: 100vh;">
+        <header class="app-header" style="position: absolute; top: 0; left: 0; width: 100%;">
+            <div class="header-content">
+                <div class="logo">BOMBEIROS CBI-1 <span>| Visualização</span></div>
+                <div class="user-menu">
+                    <a href="{{ url_for('chuvas_intensas') }}" class="btn-secondary btn-sm">Voltar ao Menu</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="app-content" style="width: 100%; display: flex; align-items: center; justify-content: center;">
+            <div class="selection-card">
+                <h2 style="text-align: center; margin-bottom: 10px; color: #0f172a;">Selecione a Visualização</h2>
+                <p style="text-align: center; color: #64748b; margin-bottom: 20px;">Escolha o agrupamento desejado:</p>
+
+                <a href="{{ url_for('chuvas_intensas_listar', gb='7GB') }}" class="btn-gb">
+                    <span><i class="bi bi-building"></i> 7º GB</span>
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+
+                <a href="{{ url_for('chuvas_intensas_listar', gb='15GB') }}" class="btn-gb">
+                    <span><i class="bi bi-building"></i> 15º GB</span>
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+
+                <a href="{{ url_for('chuvas_intensas_listar', gb='16GB') }}" class="btn-gb">
+                    <span><i class="bi bi-building"></i> 16º GB</span>
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+
+                <a href="{{ url_for('chuvas_intensas_listar', gb='19GB') }}" class="btn-gb">
+                    <span><i class="bi bi-building"></i> 19º GB</span>
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+
+                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 10px 0;">
+
+                <a href="{{ url_for('chuvas_intensas_listar', modo='meus') }}" class="btn-gb btn-meus">
+                    <span><i class="bi bi-person-badge"></i> Minhas Ocorrências</span>
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>
