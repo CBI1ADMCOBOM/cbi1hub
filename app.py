@@ -717,7 +717,6 @@ def save_vulto():
             'municipio_nome': data.get('municipio_nome'), # Alterado de id para nome (Texto)
             'endereco': data.get('endereco'),
             'bairro': data.get('bairro'),
-            # 'referencia': data.get('referencia'), # Removido
             'qtd_viaturas': data.get('qtd_viaturas'),
             'qtd_bombeiros': data.get('qtd_bombeiros'),
             'tempo_resposta_minutos': data.get('tempo_resposta'),

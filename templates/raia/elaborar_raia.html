@@ -14,6 +14,7 @@
             display: flex;
             gap: 15px;
             margin-top: 10px;
+            width: 100%;
         }
 
         .radio-button-label {
@@ -21,38 +22,121 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 10px 20px;
+            padding: 12px 20px;
             border-radius: 8px;
             cursor: pointer;
-            border: 2px solid #e2e8f0;
-            background: #fff;
-            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #64748b;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             flex: 1;
             font-weight: 600;
-            color: #64748b;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .radio-button-label:hover {
-            border-color: #cbd5e1;
-            background: #f8fafc;
+            background: #f1f5f9;
+            transform: translateY(-1px);
         }
 
         .radio-button-input {
             display: none;
         }
 
-        /* Estilo quando "Sim" (Verde) está marcado */
+        /* Estilo Sólido "Sim" (Verde - Premium) */
         .radio-button-input[value="YES"]:checked+.radio-button-label {
+            background-color: #22c55e;
             border-color: #22c55e;
-            background: #dcfce7;
-            color: #166534;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.3);
         }
 
-        /* Estilo quando "Não" (Vermelho) está marcado */
+        /* Estilo Sólido "Não" (Vermelho - Premium - Sem Responsável) */
         .radio-button-input[value="NO"]:checked+.radio-button-label {
+            background-color: #ef4444;
             border-color: #ef4444;
-            background: #fee2e2;
-            color: #991b1b;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+        }
+
+        .radio-button-label i {
+            font-size: 1.1em;
+        }
+
+        /* Novo Padrão de Título (Section Header) */
+        .section-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+            font-weight: 600;
+            color: #dc2626;
+            /* Cor Vermelha Padrão */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+            margin-top: 30px;
+        }
+
+        .section-header i {
+            font-size: 1.2em;
+        }
+
+        /* Animação Botão Premium */
+        @keyframes gradient-xy {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes pulse-ring-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+            }
+        }
+
+        .btn-premium-action {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, #dc2626, #ef4444, #991b1b, #dc2626);
+            background-size: 300% 300%;
+            animation: gradient-xy 4s ease infinite, pulse-ring-red 2s infinite;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-premium-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.5);
+            filter: brightness(1.1);
         }
     </style>
 </head>
@@ -61,13 +145,23 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-content">
-                <div class="logo">BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
-                        Elaborar RAIA</span></div>
-                <div class="user-menu">
-                    <a href="{{ url_for('dashboard') }}" class="btn-secondary btn-sm" style="margin-right: 10px;">Voltar
-                        ao Menu</a>
-                    <span>{{ user.email }}</span>
-                    <a href="{{ url_for('logout') }}" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Sair</a>
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 40px; width: auto;">
+                    <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                            R.A.I.A</span></span>
+                </div>
+                <div class="user-menu" style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 0.9rem; color: #e5e7eb; margin-right: 10px;">{{ user.war_name }}</span>
+                    <a href="{{ url_for('elaborar_raia_listar') }}" class="header-icon-btn">
+                        <i class="bi bi-list-ul"></i> Visualizar
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="header-icon-btn">
+                        <i class="bi bi-house-door-fill"></i> Início
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="header-icon-btn">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </a>
                 </div>
             </div>
         </header>
@@ -81,7 +175,8 @@
 
                 <form id="occurrence-form">
                     <!-- Unidade -->
-                    <div class="section-title">Unidade de Atendimento</div>
+                    <!-- Unidade -->
+                    <div class="section-header"><i class="bi bi-building"></i> Unidade de Atendimento</div>
                     <div class="form-group">
                         <label for="opm_id">Área de atendimento da EB:</label>
                         <select id="opm_id" name="opm_id" required>
@@ -96,7 +191,8 @@
                     </div>
 
                     <!-- Localização -->
-                    <div class="section-title">Localização</div>
+                    <!-- Localização -->
+                    <div class="section-header"><i class="bi bi-geo-alt-fill"></i> Localização</div>
 
 
 
@@ -115,7 +211,8 @@
                     </div>
 
                     <!-- Detalhes -->
-                    <div class="section-title">Detalhes do Incidente</div>
+                    <!-- Detalhes -->
+                    <div class="section-header"><i class="bi bi-card-text"></i> Detalhes do Incidente</div>
                     <div class="form-group">
                         <label for="nature">Natureza da Ocorrência</label>
                         <select id="nature" name="nature" required>
@@ -130,7 +227,8 @@
                     </div>
 
                     <!-- Responsável -->
-                    <div class="section-title">Responsável no Local</div>
+                    <!-- Responsável -->
+                    <div class="section-header"><i class="bi bi-person-fill"></i> Responsável no Local</div>
                     <div class="form-group">
                         <div class="radio-buttons-container">
                             <!-- Opção NÃO -->
@@ -168,7 +266,8 @@
                     </div>
 
                     <!-- Mídia -->
-                    <div class="section-title">Fotos</div>
+                    <!-- Mídia -->
+                    <div class="section-header"><i class="bi bi-camera-fill"></i> Fotos</div>
                     <div class="form-group">
                         <div class="file-upload-container">
                             <label for="photos" class="btn-secondary"><i class="bi bi-camera"></i> Adicionar Fotos
@@ -182,7 +281,9 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn-primary">Registrar Ocorrência</button>
+                        <button type="submit" class="btn-premium-action">
+                            <i class="bi bi-check-circle-fill"></i> Gerar R.A.I.A
+                        </button>
                     </div>
                 </form>
             </div>

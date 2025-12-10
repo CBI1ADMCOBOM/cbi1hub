@@ -22,6 +22,7 @@
             display: flex;
             gap: 15px;
             margin-bottom: 2rem;
+            width: 100%;
         }
 
         .radio-button-label {
@@ -32,39 +33,44 @@
             padding: 15px 20px;
             border-radius: 8px;
             cursor: pointer;
-            border: 2px solid #e2e8f0;
-            background: #fff;
-            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #64748b;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             flex: 1;
             font-weight: 700;
-            color: #64748b;
             text-transform: uppercase;
             font-size: 1.1rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .radio-button-label:hover {
-            border-color: #cbd5e1;
-            background: #f8fafc;
+            background: #f1f5f9;
+            transform: translateY(-1px);
         }
 
         .radio-button-input {
             display: none;
         }
 
-        /* OPERACIONAL (Azul) */
+        /* OPERACIONAL (Azul Sólido - Premium) */
         .radio-button-input[value="operacional"]:checked+.radio-button-label {
+            background-color: #2563eb;
             border-color: #2563eb;
-            background: #eff6ff;
-            color: #1d4ed8;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
         }
 
-        /* TÉCNICA (Laranja) */
+        /* TÉCNICA (Laranja Sólido - Premium) */
         .radio-button-input[value="tecnica"]:checked+.radio-button-label {
+            background-color: #ea580c;
             border-color: #ea580c;
-            background: #fff7ed;
-            color: #c2410c;
-            box-shadow: 0 4px 6px -1px rgba(234, 88, 12, 0.1);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(234, 88, 12, 0.3);
+        }
+
+        .radio-button-label i {
+            font-size: 1.2rem;
         }
 
         .option-group {
@@ -113,6 +119,40 @@
                 transform: translateY(0);
             }
         }
+
+        .sub-form {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .sub-form label {
+            font-size: 0.9em;
+            color: #64748b;
+        }
+
+        /* Novo Padrão de Título (Section Header) */
+        .section-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+            font-weight: 600;
+            color: #dc2626;
+            /* Cor Vermelha Padrão */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+            margin-top: 30px;
+        }
+
+        .section-header i {
+            font-size: 1.2em;
+        }
     </style>
 </head>
 
@@ -120,15 +160,23 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-content">
-                <div class="logo">BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
-                        Inconsistência</span></div>
-                <div class="user-menu">
-                    <span style="font-size: 0.9rem; margin-right: 1rem;">{{ user.war_name }}</span>
-                    <a href="{{ url_for('gerar_inconsistencia_listar') }}" class="btn-secondary btn-sm"
-                        style="margin-right: 0.5rem;">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 40px; width: auto;">
+                    <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                            Inconsistência</span></span>
+                </div>
+                <div class="user-menu" style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 0.9rem; color: #e5e7eb; margin-right: 10px;">{{ user.war_name }}</span>
+                    <a href="{{ url_for('gerar_inconsistencia_listar') }}" class="header-icon-btn">
                         <i class="bi bi-list-ul"></i> Visualizar
                     </a>
-                    <a href="{{ url_for('gerar_inconsistencia') }}" class="btn-secondary btn-sm">Voltar</a>
+                    <a href="{{ url_for('dashboard') }}" class="header-icon-btn">
+                        <i class="bi bi-house-door-fill"></i> Início
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="header-icon-btn">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </a>
                 </div>
             </div>
         </header>
@@ -142,8 +190,9 @@
 
                 <form id="incForm" onsubmit="handleSubmit(event)">
                     <!-- Toggle Tipo -->
+                    <div class="section-header"><i class="bi bi-exclamation-octagon"></i> Tipo de Inconsistência</div>
                     <div class="form-group">
-                        <label>Tipo de Inconsistência</label>
+                        <!-- <label>Tipo de Inconsistência</label> Removido label duplicado -->
                         <div class="radio-buttons-container">
                             <input type="radio" id="tipo_operacional" name="tipo" value="operacional"
                                 class="radio-button-input" checked onchange="handleTipoChange(this.value)">
@@ -160,19 +209,22 @@
                     </div>
 
                     <!-- Campos Básicos -->
-                    <div class="grid-2">
+                    <div class="section-header"><i class="bi bi-info-circle"></i> Dados da Ocorrência</div>
+                    <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-group">
                             <label>Data da Ocorrência</label>
-                            <input type="date" name="data_ocorrencia" id="data_ocorrencia" required
-                                class="form-control">
+                            <input type="date" name="data_ocorrencia" id="data_ocorrencia" required class="form-control"
+                                style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px;">
                         </div>
                         <div class="form-group" id="talao-group">
                             <label>Número do Talão</label>
-                            <input type="text" name="talao" placeholder="Ex: 1234" class="form-control">
+                            <input type="text" name="talao" placeholder="Ex: 1234" class="form-control"
+                                style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px;">
                         </div>
                     </div>
 
                     <!-- Opções Operacionais -->
+                    <div class="section-header"><i class="bi bi-list-check"></i> Detalhes da Inconsistência</div>
                     <div id="group-operacional" class="option-group active">
                         <div class="radio-item">
                             <label>
@@ -283,10 +335,11 @@
                             </label>
                             <!-- Sub-formulário para T4-193 -->
                             <div id="sub-T4_193" class="sub-form">
-                                <div class="grid-2">
+                                <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                                     <div class="form-group">
                                         <label>Origem</label>
-                                        <select name="t4_origem" class="form-control">
+                                        <select name="t4_origem" class="form-control"
+                                            style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px;">
                                             <option value="">Selecione...</option>
                                             <option value="FIXO">Fixo</option>
                                             <option value="MOVEL">Móvel</option>
@@ -294,7 +347,8 @@
                                     </div>
                                     <div class="form-group">
                                         <label>Operadora</label>
-                                        <select name="t4_operadora" class="form-control">
+                                        <select name="t4_operadora" class="form-control"
+                                            style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px;">
                                             <option value="">Selecione...</option>
                                             <option value="VIVO">Vivo</option>
                                             <option value="CLARO">Claro</option>
@@ -304,19 +358,22 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="grid-2">
+                                <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                                     <div class="form-group">
                                         <label>Número que tentou ligar</label>
-                                        <input type="tel" name="t4_numero" class="form-control">
+                                        <input type="tel" name="t4_numero" class="form-control"
+                                            style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px;">
                                     </div>
                                     <div class="form-group">
                                         <label>Data e Horário</label>
-                                        <input type="datetime-local" name="t4_datahora" class="form-control">
+                                        <input type="datetime-local" name="t4_datahora" class="form-control"
+                                            style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px;">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label>Tipo de Falha</label>
-                                    <select name="t4_falha" class="form-control">
+                                    <select name="t4_falha" class="form-control"
+                                        style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px;">
                                         <option value="">Selecione...</option>
                                         <option value="NAO_CHAMA">Não Chama</option>
                                         <option value="CAI_OUTRO_LUGAR">Cai em outro lugar</option>
@@ -347,15 +404,16 @@
                     </div>
 
                     <div class="form-group" style="margin-top: 1.5rem;">
-                        <label>Observações</label>
-                        <textarea name="observacao" rows="4" class="form-control"
-                            placeholder="Detalhes adicionais..."></textarea>
+                        <div class="section-header"><i class="bi bi-pencil-square"></i> Observações</div>
+                        <!-- <label>Observações</label> Removido label duplicado -->
+                        <textarea name="observacao" rows="4" class="form-control" placeholder="Detalhes adicionais..."
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px;"></textarea>
                     </div>
 
-                    <div class="form-actions"
-                        style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
-                        <a href="{{ url_for('gerar_inconsistencia') }}" class="btn-secondary">Cancelar</a>
-                        <button type="submit" class="btn-primary">Gerar Relatório</button>
+                    <div class="form-actions" style="display: flex; justify-content: center; margin-top: 2rem;">
+                        <button type="submit" class="btn-premium-action">
+                            <i class="bi bi-file-earmark-check-fill"></i> Gerar Relatório
+                        </button>
                     </div>
                 </form>
             </div>
@@ -370,6 +428,14 @@
             // Atualizar visibilidade dos grupos
             document.getElementById('group-operacional').className = `option-group ${tipo === 'operacional' ? 'active' : ''}`;
             document.getElementById('group-tecnica').className = `option-group ${tipo === 'tecnica' ? 'active' : ''}`;
+
+            // Resetar sub-forms ao trocar de tipo principal
+            if (tipo === 'operacional') {
+                document.querySelectorAll('.sub-form').forEach(el => el.style.display = 'none');
+                // Desmarcar radios tecnicos para evitar estado inconsistente
+                const radiosTecnicos = document.querySelectorAll('input[name="motivo_tec"]');
+                radiosTecnicos.forEach(r => r.checked = false);
+            }
 
             // Atualizar visibilidade do Talão
             const talaoGroup = document.getElementById('talao-group');

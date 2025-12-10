@@ -7,16 +7,49 @@
     <title>RAIA - Cadastro</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Novo Padrão de Título (Section Header) */
+        .section-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+            font-weight: 600;
+            color: #dc2626;
+            /* Cor Vermelha Padrão */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+            margin-top: 20px;
+        }
+
+        .section-header i {
+            font-size: 1.2em;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            white-space: nowrap;
+        }
+    </style>
 </head>
 
 <body>
     <div class="signup-container">
         <div class="signup-card">
             <div class="signup-header">
-                <div class="logo">BOMBEIROS CBI-1</div>
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 50px; width: auto;">
+                    BOMBEIROS CBI-1
+                </div>
                 <p>Crie sua conta</p>
             </div>
             <form id="signup-form">
+                <div class="section-header"><i class="bi bi-person-vcard"></i> Identificação Pessoal</div>
                 <div class="form-row">
                     <div class="form-group" style="flex: 2;">
                         <label for="full_name">Nome Completo</label>
@@ -28,6 +61,7 @@
                     </div>
                 </div>
 
+                <div class="section-header"><i class="bi bi-briefcase-fill"></i> Dados Profissionais</div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="re">R.E. (com dígito)</label>
@@ -61,6 +95,7 @@
                     </select>
                 </div>
 
+                <div class="section-header"><i class="bi bi-shield-lock-fill"></i> Contato e Acesso</div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="contact">Contato (Celular com DDD)</label>

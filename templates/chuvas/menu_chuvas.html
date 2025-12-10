@@ -59,10 +59,16 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-content">
-                <div class="logo">BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
-                        CHUVAS</span></div>
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 40px; width: auto;">
+                    <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                            Chuvas Intensas</span></span>
+                </div>
                 <div class="user-menu">
-                    <a href="{{ url_for('dashboard') }}" class="btn-secondary btn-sm">Voltar ao Início</a>
+                    <a href="{{ url_for('dashboard') }}" class="header-icon-btn">
+                        <i class="bi bi-house-door-fill"></i> Início
+                    </a>
                 </div>
             </div>
         </header>

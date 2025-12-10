@@ -57,10 +57,16 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-content">
-                <div class="logo">BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
-                        VULTO</span></div>
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 40px; width: auto;">
+                    <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                            VULTO</span></span>
+                </div>
                 <div class="user-menu">
-                    <a href="{{ url_for('dashboard') }}" class="btn-secondary btn-sm">Voltar ao Início</a>
+                    <a href="{{ url_for('dashboard') }}" class="header-icon-btn">
+                        <i class="bi bi-house-door-fill"></i> Início
+                    </a>
                 </div>
             </div>
         </header>
@@ -86,24 +92,43 @@
             </div>
 
             <div style="display: flex; justify-content: center; margin-top: 2rem;">
-                <a href="#" onclick="return false;" style="
-                    background: rgba(255, 255, 255, 0.9);
-                    padding: 0.75rem 2rem;
-                    border-radius: 8px;
-                    text-decoration: none;
-                    color: var(--primary-color);
-                    font-weight: 600;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    transition: transform 0.2s;
-                    width: 100%;
-                    max-width: 300px;
-                    justify-content: center;
-                " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                    <i class="bi bi-info-circle"></i> Critérios de Vulto
-                </a>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+                    <a href="{{ url_for('static', filename='Nota de Intrução CoodOPCB-001_812_19.pdf') }}"
+                        target="_blank" style="
+                        background: rgba(255, 255, 255, 0.9);
+                        padding: 0.75rem 2rem;
+                        border-radius: 8px;
+                        text-decoration: none;
+                        color: var(--primary-color);
+                        font-weight: 600;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        transition: transform 0.2s;
+                        justify-content: center;
+                    " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                        <i class="bi bi-file-text"></i> Nota de Instrução
+                    </a>
+
+                    <a href="{{ url_for('static', filename='O-Comp-no-CCB-001_521_22-Ocorrencias-de-Vulto-Destaque.pdf') }}"
+                        target="_blank" style="
+                        background: rgba(255, 255, 255, 0.9);
+                        padding: 0.75rem 2rem;
+                        border-radius: 8px;
+                        text-decoration: none;
+                        color: var(--primary-color);
+                        font-weight: 600;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        transition: transform 0.2s;
+                        justify-content: center;
+                    " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                        <i class="bi bi-file-earmark-pdf"></i> Ordem Complementar
+                    </a>
+                </div>
             </div>
         </main>
     </div>

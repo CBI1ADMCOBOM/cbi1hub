@@ -13,6 +13,7 @@
             display: flex;
             gap: 15px;
             margin-top: 5px;
+            width: 100%;
         }
 
         .radio-button-label {
@@ -20,39 +21,124 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 10px 20px;
+            padding: 12px 20px;
             border-radius: 8px;
             cursor: pointer;
-            border: 2px solid #e2e8f0;
-            background: #fff;
-            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #64748b;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             flex: 1;
             font-weight: 600;
-            color: #64748b;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .radio-button-label:hover {
-            border-color: #cbd5e1;
-            background: #f8fafc;
+            background: #f1f5f9;
+            transform: translateY(-1px);
         }
 
         .radio-button-input {
             display: none;
         }
 
-        /* Cores específicas para Status Vulto */
-        /* EM ATENDIMENTO (Azul) */
+        /* ESTILOS SÓLIDOS (PREMIUM) QUANDO SELECIONADO */
+
+        /* EM ATENDIMENTO (Azul Sólido) */
         .radio-button-input[value="EM ATENDIMENTO"]:checked+.radio-button-label {
+            background-color: #3b82f6;
             border-color: #3b82f6;
-            background: #eff6ff;
-            color: #1d4ed8;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
         }
 
-        /* ENCERRADA (Verde - Concluído) */
-        .radio-button-input[value="ENCERRADA"]:checked+.radio-button-label {
+        /* ENCERRADA / SIM (Verde Sólido) */
+        .radio-button-input[value="ENCERRADA"]:checked+.radio-button-label,
+        .radio-button-input[value="sim"]:checked+.radio-button-label {
+            background-color: #22c55e;
             border-color: #22c55e;
-            background: #dcfce7;
-            color: #166534;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.3);
+        }
+
+        /* NÃO (Vermelho Sólido) */
+        .radio-button-input[value="nao"]:checked+.radio-button-label {
+            background-color: #ef4444;
+            border-color: #ef4444;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Ícones dentro do label */
+        .radio-button-label i {
+            font-size: 1.1em;
+        }
+
+        /* Novo Padrão de Título (Section Header) */
+        .section-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+            font-weight: 600;
+            color: #dc2626;
+            /* Cor Primária Vermelha */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+            margin-top: 30px;
+        }
+
+        .section-header i {
+            font-size: 1.2em;
+        }
+
+        /* Animação Botão IA */
+        @keyframes gradient-xy {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(168, 85, 247, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
+            }
+        }
+
+        .btn-ai-feature {
+            background: linear-gradient(45deg, #4f46e5, #9333ea, #c026d3, #4f46e5);
+            background-size: 300% 300%;
+            animation: gradient-xy 4s ease infinite, pulse-ring 2s infinite;
+            border: none;
+            color: white;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .btn-ai-feature:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
         }
     </style>
 </head>
@@ -61,13 +147,23 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-content">
-                <div class="logo">BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
-                        Elaborar Vulto</span></div>
-                <div class="user-menu">
-                    <a href="{{ url_for('dashboard') }}" class="btn-secondary btn-sm" style="margin-right: 10px;">Voltar
-                        ao Menu</a>
-                    <span>{{ user.email }}</span>
-                    <a href="{{ url_for('logout') }}" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Sair</a>
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 40px; width: auto;">
+                    <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                            Vulto</span></span>
+                </div>
+                <div class="user-menu" style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 0.9rem; color: #e5e7eb; margin-right: 10px;">{{ user.war_name }}</span>
+                    <a href="{{ url_for('elaborar_vulto_listar') }}" class="header-icon-btn">
+                        <i class="bi bi-list-ul"></i> Visualizar
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="header-icon-btn">
+                        <i class="bi bi-house-door-fill"></i> Início
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="header-icon-btn">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </a>
                 </div>
             </div>
         </header>
@@ -81,7 +177,8 @@
 
                 <form id="vulto-form">
                     <!-- Unidade e Dados Básicos -->
-                    <div class="section-title">Dados Iniciais</div>
+                    <!-- Unidade e Dados Básicos -->
+                    <div class="section-header"><i class="bi bi-info-circle"></i> Dados Iniciais</div>
                     <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
                         <div class="form-group" style="flex: 1; min-width: 250px;">
                             <label for="opm_id">Unidade de Atendimento:</label>
@@ -135,7 +232,8 @@
                     </div>
 
                     <!-- Classificação -->
-                    <div class="section-title">Classificação</div>
+                    <!-- Classificação -->
+                    <div class="section-header"><i class="bi bi-exclamation-triangle"></i> Classificação</div>
                     <div class="form-group">
                         <label for="justificativa_vulto">D. Justificativa (Tipo de Destaque):</label>
                         <select id="justificativa_vulto" name="justificativa_vulto" required>
@@ -222,7 +320,8 @@
                     </div>
 
                     <!-- Localização -->
-                    <div class="section-title">Localização</div>
+                    <!-- Localização -->
+                    <div class="section-header"><i class="bi bi-geo-alt-fill"></i> Localização</div>
                     <div class="form-group">
                         <label for="municipio_nome">F. Município:</label>
                         <select id="municipio_nome" name="municipio_nome" required>
@@ -410,7 +509,8 @@
                     </div>
 
                     <!-- Recursos -->
-                    <div class="section-title">Recursos e Pessoal</div>
+                    <!-- Recursos -->
+                    <div class="section-header"><i class="bi bi-people-fill"></i> Recursos e Pessoal</div>
                     <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
                         <div class="form-group" style="flex: 1;">
                             <label for="qtd_viaturas">I. Quantidade de Viaturas:</label>
@@ -448,26 +548,23 @@
                         </div>
                     </div>
 
-                    <div class="section-title">P. Oficiais Presentes</div>
+                    <div class="section-header"><i class="bi bi-person-badge-fill"></i> P. Oficiais Presentes</div>
                     <div class="form-group"
                         style="background: #fff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                         <label style="display: block; margin-bottom: 12px; font-weight: 600; color: #374151;">Houve
                             Oficial no Local?</label>
 
-                        <div style="display: flex; gap: 20px; margin-bottom: 5px;">
-                            <label
-                                style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 10px; border: 1px solid #fecaca; border-radius: 6px; flex: 1; background: #fef2f2; color: #991b1b;">
-                                <input type="radio" name="oficial_presente_opt" id="sem_oficial" value="nao" checked
-                                    onchange="toggleOficial(false)"
-                                    style="transform: scale(1.2); accent-color: #ef4444;">
-                                <span style="font-weight: 500;">Não (Sem Oficial)</span>
+                        <div class="radio-buttons-container" style="margin-bottom: 5px;">
+                            <input type="radio" name="oficial_presente_opt" id="sem_oficial" value="nao"
+                                class="radio-button-input" checked onchange="toggleOficial(false)">
+                            <label for="sem_oficial" class="radio-button-label">
+                                <i class="bi bi-x-circle-fill"></i> Não (Sem Oficial)
                             </label>
-                            <label
-                                style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 10px; border: 1px solid #bbf7d0; border-radius: 6px; flex: 1; background: #f0fdf4; color: #166534;">
-                                <input type="radio" name="oficial_presente_opt" id="com_oficial" value="sim"
-                                    onchange="toggleOficial(true)"
-                                    style="transform: scale(1.2); accent-color: #16a34a;">
-                                <span style="font-weight: 500;">Sim (Oficial Presente)</span>
+
+                            <input type="radio" name="oficial_presente_opt" id="com_oficial" value="sim"
+                                class="radio-button-input" onchange="toggleOficial(true)">
+                            <label for="com_oficial" class="radio-button-label">
+                                <i class="bi bi-check-circle-fill"></i> Sim (Oficial Presente)
                             </label>
                         </div>
 
@@ -495,7 +592,8 @@
                     </div>
 
                     <!-- Histórico -->
-                    <div class="section-title">Histórico da Ocorrência</div>
+                    <!-- Histórico -->
+                    <div class="section-header"><i class="bi bi-file-text-fill"></i> Histórico da Ocorrência</div>
                     <div class="form-group">
                         <label for="historico_inicial">L. Histórico Inicial (O que motivou o atendimento):</label>
                         <textarea id="historico_inicial" name="historico_inicial" rows="3" required></textarea>
@@ -529,14 +627,9 @@
                     </div>
 
                     <!-- Botões de Ação -->
-                    <div class="form-row" style="display: flex; gap: 15px; margin-top: 30px;">
-                        <button type="button" class="btn-primary"
-                            style="flex: 1; background-color: #dc2626; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <div class="form-row" style="margin-top: 30px;">
+                        <button type="button" class="btn-premium-action">
                             <i class="fas fa-file-alt"></i> Gerar Vulto (Padrão)
-                        </button>
-                        <button type="button" class="btn-primary"
-                            style="flex: 1; background: linear-gradient(135deg, #6366f1, #a855f7); border: none; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                            <i class="fas fa-magic"></i> Gerar Vulto Aprimorado com IA
                         </button>
                     </div>
 
@@ -556,6 +649,14 @@
                             <button type="submit" class="btn-primary"
                                 style="flex: 1; background: #1f2937; display: flex; align-items: center; justify-content: center; gap: 10px; border: none;">
                                 <i class="fas fa-save"></i> Salvar no Sistema
+                            </button>
+                        </div>
+
+                        <div style="margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                            <button type="button" class="btn-primary btn-ai-feature"
+                                style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;"
+                                title="Recurso Premium">
+                                <i class="fas fa-magic"></i> Gerar Vulto Aprimorado com IA (Em Breve)
                             </button>
                         </div>
                     </div>
@@ -706,13 +807,6 @@ P. OFICIAIS QUE COMPARECERAM NO LOCAL: ${oficiaisLine}`;
 
             if (btnPadrao) {
                 btnPadrao.addEventListener('click', gerarTextoPadrao);
-            }
-
-            if (btnIA) {
-                btnIA.addEventListener('click', () => {
-                    document.getElementById('resultado-container').style.display = 'block';
-                    document.getElementById('texto_final').value = "Aguardando integração com n8n...";
-                });
             }
 
             // Listener novo botão Copiar Texto

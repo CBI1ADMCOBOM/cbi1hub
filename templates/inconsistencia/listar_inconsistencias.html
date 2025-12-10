@@ -191,15 +191,19 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-content">
-                <div class="logo">BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
-                        Minhas Inconsistências</span></div>
-                <div class="user-menu">
-                    <span style="font-size: 0.9rem; margin-right: 1rem;">{{ user.war_name }}</span>
-                    <a href="{{ url_for('gerar_inconsistencia_novo') }}" class="btn-primary btn-sm"
-                        style="margin-right: 0.5rem; text-decoration: none;">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 40px; width: auto;">
+                    <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                            Histórico Inconsistência</span></span>
+                </div>
+                <div class="user-menu" style="display: flex; gap: 10px;">
+                    <a href="{{ url_for('gerar_inconsistencia_novo') }}" class="header-icon-btn">
                         <i class="bi bi-plus-lg"></i> Nova
                     </a>
-                    <a href="{{ url_for('gerar_inconsistencia') }}" class="btn-secondary btn-sm">Voltar</a>
+                    <a href="{{ url_for('gerar_inconsistencia') }}" class="header-icon-btn">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
                 </div>
             </div>
         </header>
