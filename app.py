@@ -1180,5 +1180,49 @@ def delete_chuvas_admin(id):
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/api/raia/update/<id>', methods=['PUT'])
+@login_required
+def update_raia(id):
+    try:
+        data = request.json
+        user_id = session['user']['id']
+        
+        # Verificar ownership
+        res = supabase_admin.table('occurrences').select('user_id').eq('id', id).single().execute()
+        if not res.data:
+            return jsonify({"success": False, "error": "Ocorrência não encontrada."}), 404
+        if res.data['user_id'] != user_id:
+            return jsonify({"success": False, "error": "Permissão negada."}), 403
+
+        # Campos permitidos para atualização
+        update_data = {}
+        
+        # Mapeamento de campos do frontend para o banco
+        if 'nature_id' in data: update_data['nature_id'] = data['nature_id']
+        if 'description' in data: update_data['description'] = data['description']
+        if 'manual_location' in data: update_data['manual_location'] = data['manual_location']
+        if 'address' in data: update_data['address'] = data['address']
+        if 'status' in data: update_data['status'] = data['status']
+        
+        if 'has_responsible' in data:
+            update_data['has_responsible'] = data['has_responsible']
+            if data['has_responsible']:
+                if 'responsible_name' in data: update_data['responsible_name'] = data['responsible_name']
+                if 'responsible_role' in data: update_data['responsible_role'] = data['responsible_role']
+                if 'responsible_contact' in data: update_data['responsible_contact'] = data['responsible_contact']
+            else:
+                 update_data['responsible_name'] = None
+                 update_data['responsible_role'] = None
+                 update_data['responsible_contact'] = None
+
+        if update_data:
+            supabase_admin.table('occurrences').update(update_data).eq('id', id).execute()
+        
+        return jsonify({"success": True})
+
+    except Exception as e:
+        print(f"Erro Update RAIA: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3001, debug=True)

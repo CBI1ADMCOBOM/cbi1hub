@@ -90,6 +90,89 @@
             color: white;
             border: none;
         }
+
+        /* Responsive Improvements */
+        .page-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-container {
+            width: 300px;
+            max-width: 100%;
+        }
+
+        .search-container input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .page-card-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-container {
+                width: 100%;
+            }
+
+            /* Table to Card Transformation */
+            .admin-table thead {
+                display: none;
+            }
+
+            .admin-table,
+            .admin-table tbody,
+            .admin-table tr,
+            .admin-table td {
+                display: block;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .admin-table tr {
+                margin-bottom: 1rem;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                background: #fff;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                padding: 0.5rem;
+            }
+
+            .admin-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.75rem 0.5rem;
+                text-align: right;
+                border-bottom: 1px dashed #eee;
+            }
+
+            .admin-table td:last-child {
+                border-bottom: none;
+                justify-content: flex-end;
+            }
+
+            .admin-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--text-muted);
+                text-align: left;
+                margin-right: 1rem;
+            }
+
+            .actions-cell {
+                justify-content: flex-end;
+            }
+        }
     </style>
 </head>
 
@@ -97,20 +180,30 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-content">
-                <div class="logo">BOMBEIROS CBI-1 | Admin</div>
-                <div class="user-menu">
-                    <a href="{{ url_for('dashboard') }}" class="btn-secondary btn-sm">Voltar ao Menu</a>
-                    <a href="{{ url_for('logout') }}" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Sair</a>
+                <a href="{{ url_for('dashboard') }}" class="logo" style="text-decoration: none;">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 40px; width: auto;">
+                    <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                            Admin</span></span>
+                </a>
+                <div class="user-menu" style="display: flex; gap: 10px;">
+                    <a href="{{ url_for('dashboard') }}" class="header-icon-btn">
+                        <i class="bi bi-grid-fill"></i> Menu
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="header-icon-btn"
+                        style="border-color: rgba(220, 38, 38, 0.5); background: rgba(220, 38, 38, 0.1);">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </a>
                 </div>
             </div>
         </header>
 
         <main class="app-content" style="max-width: 1000px;">
             <div class="card">
-                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="card-header page-card-header">
                     <h2>Gerenciamento de Usuários</h2>
-                    <div class="search-box">
-                        <input type="text" id="search" placeholder="Buscar por nome ou RE..." style="padding: 0.5rem;">
+                    <div class="search-container">
+                        <input type="text" id="search" placeholder="Buscar por nome ou RE...">
                     </div>
                 </div>
 
@@ -204,21 +297,21 @@
             users.forEach(user => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>
+                    <td data-label="Nome / Guerra">
                         <div style="font-weight: 500;">${user.full_name || '-'}</div>
                         <div style="font-size: 0.85rem; color: #666;">${user.war_name || '-'}</div>
                     </td>
-                    <td>
+                    <td data-label="R.E. / Posto">
                         <div>${user.corporation_id || '-'}</div>
                         <div style="font-size: 0.85rem; color: #666;">${user.rank || '-'}</div>
                     </td>
-                    <td>
+                    <td data-label="Contato">
                         <div>${user.contact || '-'}</div>
                         <div style="font-size: 0.85rem; color: #666;">${user.email || '-'}</div>
                     </td>
-                    <td>${user.opm?.name || '-'}</td>
-                    <td><span class="badge badge-${user.role.toLowerCase()}">${user.role}</span></td>
-                    <td class="actions-cell">
+                    <td data-label="OPM">${user.opm?.name || '-'}</td>
+                    <td data-label="Role"><span class="badge badge-${user.role.toLowerCase()}">${user.role}</span></td>
+                    <td class="actions-cell" data-label="Ações">
                         <button class="btn-secondary btn-sm" onclick="editUser('${user.id}')"><i class="bi bi-pencil"></i></button>
                         <button class="btn-danger btn-sm" onclick="deleteUser('${user.id}')"><i class="bi bi-trash"></i></button>
                     </td>

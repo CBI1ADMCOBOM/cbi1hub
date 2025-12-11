@@ -145,12 +145,12 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-content">
-                <div class="logo">
+                <a href="{{ url_for('dashboard') }}" class="logo" style="text-decoration: none;">
                     <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
                         style="height: 40px; width: auto;">
                     <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
                             R.A.I.A</span></span>
-                </div>
+                </a>
                 <div class="user-menu" style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 0.9rem; color: #e5e7eb; margin-right: 10px;">{{ user.war_name }}</span>
                     <a href="{{ url_for('elaborar_raia_listar') }}" class="header-icon-btn">
@@ -489,7 +489,22 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    alert('Ocorrência registrada com sucesso! \n\nVocê pode visualizá-la no menu "VISUALIZAR", localizado ao lado da opção de gerar.');
+                    // Assuming there's a modal element with id 'customModal' and a paragraph with class 'custom-modal-text' inside it
+                    // This part of the code assumes the existence of a modal structure in the HTML.
+                    // If not, this will not display a modal and might cause errors if the elements are not found.
+                    const customModal = document.getElementById('customModal');
+                    const modalText = customModal ? customModal.querySelector('.custom-modal-text') : null;
+
+                    if (modalText) {
+                        modalText.textContent = 'Ocorrencia de R.A.I.A gerada, você pode acompanhar o status no menu visualizar.';
+                        // Assuming a way to show the modal, e.g., using Bootstrap's modal or custom display logic
+                        // Example for Bootstrap: new bootstrap.Modal(customModal).show();
+                        // For a simple div: customModal.style.display = 'block';
+                        // This part needs to be adapted based on the actual modal implementation.
+                        alert('Ocorrencia de R.A.I.A gerada, você pode acompanhar o status no menu visualizar.'); // Fallback or temporary alert
+                    } else {
+                        alert('Ocorrencia de R.A.I.A gerada, você pode acompanhar o status no menu visualizar.');
+                    }
                     window.location.href = '/elaborar-raia'; // Redireciona para o menu RAIA
                 } else {
                     alert('Erro ao salvar: ' + (result.error || 'Erro desconhecido'));

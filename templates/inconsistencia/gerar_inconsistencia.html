@@ -160,12 +160,12 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-content">
-                <div class="logo">
+                <a href="{{ url_for('dashboard') }}" class="logo" style="text-decoration: none;">
                     <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
                         style="height: 40px; width: auto;">
                     <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
                             Inconsistência</span></span>
-                </div>
+                </a>
                 <div class="user-menu" style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 0.9rem; color: #e5e7eb; margin-right: 10px;">{{ user.war_name }}</span>
                     <a href="{{ url_for('gerar_inconsistencia_listar') }}" class="header-icon-btn">

@@ -9,31 +9,62 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        .app-container {
+            justify-content: flex-start;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%);
+        }
+
+        .app-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .app-content {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
         .selection-card {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
             gap: 15px;
-            max-width: 400px;
+            max-width: 450px;
             width: 100%;
-            margin: 0 auto;
+            margin: 100px auto auto;
+            position: relative;
+            z-index: 10;
         }
 
         .btn-gb {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 20px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            padding: 0 20px;
+            height: 70px;
+            /* Reduced by ~30% */
+            border-radius: 12px;
             color: #1e293b;
-            font-weight: 600;
+            font-size: 1.1rem;
+            /* Reduced by ~30% */
+            font-weight: 800;
             text-decoration: none;
             transition: all 0.2s;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .btn-gb:hover {
@@ -44,53 +75,173 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
-        .btn-meus {
-            background: #2563eb;
+        /* Custom Colors per GB */
+        .btn-7gb {
+            background: #3b82f6;
+            border-color: #3b82f6;
             color: white;
-            border: 1px solid #2563eb;
+        }
+
+        .btn-7gb:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-15gb {
+            background: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+
+        .btn-15gb:hover {
+            background: #059669;
+            border-color: #059669;
+            color: white;
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-16gb {
+            background: #f59e0b;
+            border-color: #f59e0b;
+            color: white;
+        }
+
+        .btn-16gb:hover {
+            background: #d97706;
+            border-color: #d97706;
+            color: white;
+            box-shadow: 0 6px 15px rgba(245, 158, 11, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-19gb {
+            background: #8b5cf6;
+            border-color: #8b5cf6;
+            color: white;
+        }
+
+        .btn-19gb:hover {
+            background: #7c3aed;
+            border-color: #7c3aed;
+            color: white;
+            box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-meus {
+            background: #dc2626;
+            color: white;
+            border: 1px solid #dc2626;
+            position: relative;
+            overflow: hidden;
+            animation: pulse-red 2s infinite;
         }
 
         .btn-meus:hover {
-            background: #1d4ed8;
-            border-color: #1d4ed8;
+            background: #b91c1c;
+            border-color: #b91c1c;
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
+            animation: none;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-content {
+                padding: 1rem;
+                align-items: flex-start;
+            }
+
+            .selection-card {
+                padding: 20px;
+                margin-top: 80px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="app-container" style="justify-content: center; min-height: 100vh;">
-        <header class="app-header" style="position: absolute; top: 0; left: 0; width: 100%;">
+    <div class="app-container">
+        <header class="app-header">
             <div class="header-content">
-                <div class="logo">BOMBEIROS CBI-1 <span>| Visualização</span></div>
+                <a href="{{ url_for('dashboard') }}" class="logo" style="text-decoration: none;">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 40px; width: auto;">
+                    <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                            Visualização</span></span>
+                </a>
                 <div class="user-menu">
-                    <a href="{{ url_for('chuvas_intensas') }}" class="btn-secondary btn-sm">Voltar ao Menu</a>
+                    <a href="{{ url_for('chuvas_intensas') }}" class="header-icon-btn">
+                        <i class="bi bi-arrow-left"></i> Menu
+                    </a>
                 </div>
             </div>
         </header>
 
-        <main class="app-content" style="width: 100%; display: flex; align-items: center; justify-content: center;">
+        <main class="app-content">
             <div class="selection-card">
                 <h2 style="text-align: center; margin-bottom: 10px; color: #0f172a;">Selecione a Visualização</h2>
-                <p style="text-align: center; color: #64748b; margin-bottom: 20px;">Escolha o agrupamento desejado:</p>
+                <p style="text-align: center; color: #64748b; margin-bottom: 20px;">Escolha o GB desejado:</p>
 
-                <a href="{{ url_for('chuvas_intensas_listar', gb='7GB') }}" class="btn-gb">
-                    <span><i class="bi bi-building"></i> 7º GB</span>
+                <a href="{{ url_for('chuvas_intensas_listar', gb='7GB') }}" class="btn-gb btn-7gb">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 60px; display: flex; justify-content: center; margin-right: 10px;">
+                            <img src="{{ url_for('static', filename='img/7º GB.png') }}" alt="7º GB"
+                                style="height: 22px; width: auto;">
+                        </div>
+                        7º GB
+                    </div>
                     <i class="bi bi-chevron-right"></i>
                 </a>
 
-                <a href="{{ url_for('chuvas_intensas_listar', gb='15GB') }}" class="btn-gb">
-                    <span><i class="bi bi-building"></i> 15º GB</span>
+                <a href="{{ url_for('chuvas_intensas_listar', gb='15GB') }}" class="btn-gb btn-15gb">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 60px; display: flex; justify-content: center; margin-right: 10px;">
+                            <img src="{{ url_for('static', filename='img/15º GB.png') }}" alt="15º GB"
+                                style="height: 22px; width: auto;">
+                        </div>
+                        15º GB
+                    </div>
                     <i class="bi bi-chevron-right"></i>
                 </a>
 
-                <a href="{{ url_for('chuvas_intensas_listar', gb='16GB') }}" class="btn-gb">
-                    <span><i class="bi bi-building"></i> 16º GB</span>
+                <a href="{{ url_for('chuvas_intensas_listar', gb='16GB') }}" class="btn-gb btn-16gb">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 60px; display: flex; justify-content: center; margin-right: 10px;">
+                            <img src="{{ url_for('static', filename='img/16º GB.png') }}" alt="16º GB"
+                                style="height: 22px; width: auto;">
+                        </div>
+                        16º GB
+                    </div>
                     <i class="bi bi-chevron-right"></i>
                 </a>
 
-                <a href="{{ url_for('chuvas_intensas_listar', gb='19GB') }}" class="btn-gb">
-                    <span><i class="bi bi-building"></i> 19º GB</span>
+                <a href="{{ url_for('chuvas_intensas_listar', gb='19GB') }}" class="btn-gb btn-19gb">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 60px; display: flex; justify-content: center; margin-right: 10px;">
+                            <img src="{{ url_for('static', filename='img/19º GB.png') }}" alt="19º GB"
+                                style="height: 40px; width: auto;">
+                        </div>
+                        19º GB
+                    </div>
                     <i class="bi bi-chevron-right"></i>
                 </a>
 

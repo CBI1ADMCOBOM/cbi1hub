@@ -18,27 +18,26 @@
 
         .menu-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 2rem;
             text-align: center;
-            /* Ensure text is centered */
             text-decoration: none;
             color: var(--text-color);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e5e7eb;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            /* Changed from center to flex-start to align from top */
             min-height: 280px;
-            /* Increased min-height to accommodate larger icons */
+            position: relative;
+            overflow: hidden;
         }
 
         .menu-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             border-color: var(--primary-color);
         }
 
@@ -112,6 +111,8 @@
 
             .menu-desc {
                 font-size: 0.85rem;
+                display: none;
+                /* Hide description on mobile */
             }
         }
 

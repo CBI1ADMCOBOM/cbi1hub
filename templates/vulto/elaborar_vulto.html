@@ -147,12 +147,12 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-content">
-                <div class="logo">
+                <a href="{{ url_for('dashboard') }}" class="logo" style="text-decoration: none;">
                     <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
                         style="height: 40px; width: auto;">
                     <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
                             Vulto</span></span>
-                </div>
+                </a>
                 <div class="user-menu" style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 0.9rem; color: #e5e7eb; margin-right: 10px;">{{ user.war_name }}</span>
                     <a href="{{ url_for('elaborar_vulto_listar') }}" class="header-icon-btn">
@@ -628,8 +628,8 @@
 
                     <!-- Botões de Ação -->
                     <div class="form-row" style="margin-top: 30px;">
-                        <button type="button" class="btn-premium-action">
-                            <i class="fas fa-file-alt"></i> Gerar Vulto (Padrão)
+                        <button type="button" class="btn-premium-action" onclick="gerarTextoPadrao()">
+                            <i class="fas fa-file-alt"></i> Gerar Texto Vulto
                         </button>
                     </div>
 
@@ -643,11 +643,11 @@
 
                         <div style="margin-top: 20px; display: flex; gap: 15px;">
                             <button type="button" class="btn-primary"
-                                style="flex: 1; background: #16a34a; display: flex; align-items: center; justify-content: center; gap: 10px; border: none;">
+                                style="flex: 1; background: #6b7280; display: flex; align-items: center; justify-content: center; gap: 10px; border: none;">
                                 <i class="fas fa-copy"></i> Copiar Texto
                             </button>
                             <button type="submit" class="btn-primary"
-                                style="flex: 1; background: #1f2937; display: flex; align-items: center; justify-content: center; gap: 10px; border: none;">
+                                style="flex: 1; background: #16a34a; display: flex; align-items: center; justify-content: center; gap: 10px; border: none;">
                                 <i class="fas fa-save"></i> Salvar no Sistema
                             </button>
                         </div>
@@ -700,6 +700,84 @@
             }
         }
 
+        // Função para gerar texto padrão no frontend - MOVIDO PARA ESCOPO GLOBAL
+        function gerarTextoPadrao() {
+            const f = document.forms['vulto-form'];
+
+            // Helper para pegar valor
+            const getVal = (name) => f[name]?.value || '';
+
+            // Helper para validar datas (YYYY-MM-DD -> DD/MM/YYYY)
+            const formatDate = (dateStr) => {
+                if (!dateStr) return '';
+                const [y, m, d] = dateStr.split('-');
+                return `${d}/${m}/${y}`;
+            }
+
+            // OPM Texto
+            const opmSelect = document.getElementById('opm_id');
+            const selectedOption = opmSelect.options[opmSelect.selectedIndex];
+            let opmText = '';
+            if (selectedOption && selectedOption.value) {
+                const gb = (selectedOption.getAttribute('data-gb') || '').toUpperCase();
+                const sgb = (selectedOption.getAttribute('data-sgb') || '').toUpperCase();
+                const eb = (selectedOption.getAttribute('data-eb') || '').toUpperCase();
+
+                // Formato solicitado: 15ºGB - 1ºSGB - EB CERRADO
+                // Verifica se precisa adicionar o sufixo SGB se não vier
+                let sgbText = sgb;
+                if (sgb && !sgb.includes('SGB')) {
+                    sgbText = `${sgb} SGB`;
+                }
+
+                opmText = `${gb} - ${sgbText} - EB ${eb}`;
+            } else {
+                opmText = opmSelect.options[opmSelect.selectedIndex]?.text || '';
+            }
+
+            // Oficiais
+            let oficiaisLine = "NÃO HOUVE OFICIAL NO LOCAL";
+            // Check if radio button is checked before accessing value
+            const houveOficialEl = document.querySelector('input[name="oficial_presente_opt"]:checked');
+            const houveOficial = houveOficialEl ? houveOficialEl.value : 'nao';
+
+            if (houveOficial === 'sim') {
+                const posto = getVal('posto_oficial');
+                const nome = getVal('nome_oficial');
+                oficiaisLine = `${posto} ${nome}`;
+            }
+
+            const texto = `SECRETARIA DA SEGURANÇA PÚBLICA
+CORPO DE BOMBEIROS MILITAR DO ESTADO DE SÃO PAULO
+RELATÓRIO DE OCORRÊNCIA VULTO OU DESTAQUE
+${opmText}
+A. NÚMERO OCORRÊNCIA: ${getVal('talao_numero')}
+B. DATA/HORA DA OCORRÊNCIA: ${formatDate(getVal('data_inicio'))} às ${getVal('hora_inicio')}h.
+C. STATUS DA OCORRÊNCIA: ${getVal('status')}
+D. TIPO DE OCORRÊNCIA (JUSTIFICATIVA VULTO/DESTAQUE): ${getVal('justificativa_vulto')}
+E. NATUREZA DA OCORRÊNCIA: ${getVal('natureza_codigo')}
+F. MUNICÍPIO: ${getVal('municipio_nome')}
+G. ENDEREÇO: ${getVal('endereco')}
+H. BAIRRO:    ${getVal('bairro')}
+I. QUANTIDADE DE VIATURAS: ${getVal('qtd_viaturas')}
+J. QUANTIDADE DE MILITARES: ${getVal('qtd_bombeiros')}
+K. ENCARREGADO NO LOCAL DA OCORRÊNCIA: ${getVal('encarregado_posto')} ${getVal('encarregado_nome')}
+L. HISTÓRICO INICIAL: ${getVal('historico_inicial')}
+M. HISTÓRICO FINAL: ${getVal('historico_final')}
+N. NOME PM TRANSMISSÃO: ${getVal('pm_transmissao_posto')} ${getVal('pm_transmissao_nome')}
+O. TEMPO PRIMEIRA VTR NO LOCAL (em minutos): ${getVal('tempo_resposta')}
+P. OFICIAIS QUE COMPARECERAM NO LOCAL: ${oficiaisLine}`;
+
+            document.getElementById('texto_final').value = texto;
+            document.getElementById('resultado-container').style.display = 'block';
+
+            // Scroll suave até o resultado
+            setTimeout(() => {
+                document.getElementById('resultado-container').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             // Setar data atual
             const dataInicio = document.getElementById('data_inicio');
@@ -729,90 +807,10 @@
                     });
                 });
 
-            // Função para gerar texto padrão no frontend
-            function gerarTextoPadrao() {
-                const f = document.forms['vulto-form'];
-
-                // Helper para pegar valor
-                const getVal = (name) => f[name]?.value || '';
-
-                // Helper para validar datas (YYYY-MM-DD -> DD/MM/YYYY)
-                const formatDate = (dateStr) => {
-                    if (!dateStr) return '';
-                    const [y, m, d] = dateStr.split('-');
-                    return `${d}/${m}/${y}`;
-                }
-
-                // OPM Texto
-                const opmSelect = document.getElementById('opm_id');
-                const selectedOption = opmSelect.options[opmSelect.selectedIndex];
-                let opmText = '';
-                if (selectedOption && selectedOption.value) {
-                    const gb = (selectedOption.getAttribute('data-gb') || '').toUpperCase();
-                    const sgb = (selectedOption.getAttribute('data-sgb') || '').toUpperCase();
-                    const eb = (selectedOption.getAttribute('data-eb') || '').toUpperCase();
-
-                    // Formato solicitado: 15ºGB - 1ºSGB - EB CERRADO
-                    // Verifica se precisa adicionar o sufixo SGB se não vier
-                    let sgbText = sgb;
-                    if (sgb && !sgb.includes('SGB')) {
-                        sgbText = `${sgb} SGB`;
-                    }
-
-                    opmText = `${gb} - ${sgbText} - EB ${eb}`;
-                } else {
-                    opmText = opmSelect.options[opmSelect.selectedIndex]?.text || '';
-                }
-
-                // Oficiais
-                let oficiaisLine = "NÃO HOUVE OFICIAL NO LOCAL";
-                const houveOficial = document.querySelector('input[name="oficial_presente_opt"]:checked').value;
-                if (houveOficial === 'sim') {
-                    const posto = getVal('posto_oficial');
-                    const nome = getVal('nome_oficial');
-                    oficiaisLine = `${posto} ${nome}`;
-                }
-
-                const texto = `SECRETARIA DA SEGURANÇA PÚBLICA
-CORPO DE BOMBEIROS MILITAR DO ESTADO DE SÃO PAULO
-RELATÓRIO DE OCORRÊNCIA VULTO OU DESTAQUE
-${opmText}
-A. NÚMERO OCORRÊNCIA: ${getVal('talao_numero')}
-B. DATA/HORA DA OCORRÊNCIA: ${formatDate(getVal('data_inicio'))} às ${getVal('hora_inicio')}h.
-C. STATUS DA OCORRÊNCIA: ${getVal('status')}
-D. TIPO DE OCORRÊNCIA (JUSTIFICATIVA VULTO/DESTAQUE): ${getVal('justificativa_vulto')}
-E. NATUREZA DA OCORRÊNCIA: ${getVal('natureza_codigo')}
-F. MUNICÍPIO: ${getVal('municipio_nome')}
-G. ENDEREÇO: ${getVal('endereco')}
-H. BAIRRO:    ${getVal('bairro')}
-I. QUANTIDADE DE VIATURAS: ${getVal('qtd_viaturas')}
-J. QUANTIDADE DE MILITARES: ${getVal('qtd_bombeiros')}
-K. ENCARREGADO NO LOCAL DA OCORRÊNCIA: ${getVal('encarregado_posto')} ${getVal('encarregado_nome')}
-L. HISTÓRICO INICIAL: ${getVal('historico_inicial')}
-M. HISTÓRICO FINAL: ${getVal('historico_final')}
-N. NOME PM TRANSMISSÃO: ${getVal('pm_transmissao_posto')} ${getVal('pm_transmissao_nome')}
-O. TEMPO PRIMEIRA VTR NO LOCAL (em minutos): ${getVal('tempo_resposta')}
-P. OFICIAIS QUE COMPARECERAM NO LOCAL: ${oficiaisLine}`;
-
-                document.getElementById('texto_final').value = texto;
-                document.getElementById('resultado-container').style.display = 'block';
-
-                // Scroll suave até o resultado
-                document.getElementById('resultado-container').scrollIntoView({ behavior: 'smooth' });
-            }
-
-            // Eventos para os botões
-            const btnPadrao = document.querySelector('.form-row button.btn-primary:first-child');
-            const btnIA = document.querySelectorAll('.form-row button.btn-primary')[1];
-
-            if (btnPadrao) {
-                btnPadrao.addEventListener('click', gerarTextoPadrao);
-            }
-
             // Listener novo botão Copiar Texto
-            const btnCopy = document.querySelector('button i[class="fas fa-copy"]').parentNode;
-            if (btnCopy) {
-                btnCopy.addEventListener('click', () => {
+            const btnCopy = document.querySelector('button i[class="fas fa-copy"]');
+            if (btnCopy && btnCopy.parentNode) {
+                btnCopy.parentNode.addEventListener('click', () => {
                     const txt = document.getElementById('texto_final');
                     txt.select();
                     navigator.clipboard.writeText(txt.value).then(() => {

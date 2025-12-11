@@ -9,167 +9,280 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        /* Estilos específicos para esta página */
-        .page-layout {
-            display: flex;
-            height: calc(100vh - 70px);
-            /* Altura total menos header */
-            overflow: hidden;
-            position: relative;
-        }
-
-        .list-container {
-            flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
-            transition: margin-right 0.3s ease;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+        .raia-card {
             background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            border-left: 5px solid #dc2626;
         }
 
-        .data-table th {
-            background: #f8fafc;
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .data-table td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: middle;
-        }
-
-        .data-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .data-table tr:hover {
-            background-color: #f1f5f9;
-        }
-
-        /* Side Panel */
-        .side-panel {
-            position: fixed;
-            top: 70px;
-            /* Abaixo do header */
-            right: -500px;
-            /* Escondido inicialmente */
-            width: 500px;
-            height: calc(100vh - 70px);
-            background: white;
-            box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            border-left: 1px solid var(--border-color);
-        }
-
-        .side-panel.open {
-            right: 0;
-        }
-
-        .panel-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
+        .raia-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #f8fafc;
+            margin-bottom: 15px;
         }
 
-        .panel-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-color);
-            margin: 0;
+        .raia-natureza {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #1f2937;
         }
 
-        .btn-close-panel {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: color 0.2s;
+        .raia-data {
+            color: #6b7280;
+            font-size: 0.9em;
         }
 
-        .btn-close-panel:hover {
-            color: var(--danger-color);
-        }
-
-        .panel-content {
-            padding: 1.5rem;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .detail-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .detail-label {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            margin-bottom: 0.25rem;
-            font-weight: 500;
-        }
-
-        .detail-value {
-            font-size: 1rem;
-            color: var(--text-color);
-            line-height: 1.5;
-        }
-
-        .photo-grid {
+        .raia-details {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        .detail-item strong {
+            display: block;
+            color: #4b5563;
+            font-size: 0.85em;
+            margin-bottom: 2px;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-open {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-closed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .photos-container {
+            display: flex;
             gap: 10px;
-            margin-top: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            margin-top: 10px;
         }
 
         .photo-thumb {
-            width: 100%;
-            aspect-ratio: 1;
+            height: 60px;
+            width: 60px;
             object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
             cursor: pointer;
-            transition: transform 0.2s;
         }
 
-        .photo-thumb:hover {
-            transform: scale(1.05);
+        .card-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f3f4f6;
         }
 
-        /* Overlay para mobile ou quando o painel abre */
-        .panel-overlay {
+        .btn-card-action {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-edit {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-edit:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-delete {
+            background: #fff;
+            color: #dc2626;
+            border: 1px solid #dc2626;
+        }
+
+        .btn-delete:hover {
+            background: #fee2e2;
+        }
+
+        /* Modal Styles */
+        .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 999;
-            display: none;
             opacity: 0;
+            pointer-events: none;
             transition: opacity 0.3s;
         }
 
-        .panel-overlay.show {
-            display: block;
+        .overlay.active {
             opacity: 1;
+            pointer-events: all;
+        }
+
+        .custom-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            z-index: 1000;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .custom-modal.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .detail-row {
+            margin-bottom: 15px;
+        }
+
+        .detail-label {
+            display: block;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1em;
+            background: #f9fafb;
+            color: #1f2937;
+            transition: all 0.2s;
+        }
+
+        .edit-input:disabled {
+            background: #f3f4f6;
+            color: #6b7280;
+            cursor: not-allowed;
+            border-color: #e5e7eb;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+            background: white;
+        }
+
+        /* Modal buttons */
+        .btn-modal-primary {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-modal-secondary {
+            background: #e5e7eb;
+            color: #374151;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .custom-modal {
+                width: 100%;
+                height: 100%;
+                max-width: 100%;
+                max-height: 100%;
+                border-radius: 0;
+                top: 0;
+                left: 0;
+                transform: none;
+            }
+
+            .custom-modal.active {
+                transform: none;
+            }
         }
     </style>
 </head>
@@ -178,12 +291,12 @@
     <div class="app-container">
         <header class="app-header">
             <div class="header-content">
-                <div class="logo">
+                <a href="{{ url_for('dashboard') }}" class="logo" style="text-decoration: none;">
                     <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
                         style="height: 40px; width: auto;">
                     <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
                             Histórico RAIA</span></span>
-                </div>
+                </a>
                 <div class="user-menu">
                     <a href="{{ url_for('elaborar_raia') }}" class="header-icon-btn">
                         <i class="bi bi-arrow-left"></i> Voltar
@@ -192,222 +305,294 @@
             </div>
         </header>
 
-        <div class="page-layout">
-            <div class="list-container">
-                <div class="card" style="border: none; box-shadow: none; background: transparent;">
-                    <div class="card-header"
-                        style="padding-left: 0; padding-right: 0; background: transparent; border: none;">
-                        <h2 style="margin-bottom: 1rem; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Histórico
-                            de Ocorrências</h2>
-                    </div>
+        <main class="app-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Minhas Ocorrências RAIA</h2>
+                    <p>Histórico das ocorrências ambientais geradas por você.</p>
+                </div>
 
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Data/Hora</th>
-                                    <th>Natureza</th>
-                                    <th>Local</th>
-                                    <th>Status</th>
-                                    <th style="text-align: right;">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="occurrences-list">
-                                <tr>
-                                    <td colspan="5" style="text-align: center; padding: 2rem;">Carregando...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div id="loading" style="text-align: center; padding: 40px;">
+                    <span class="spinner-border spinner-border-lg"></span>
+                    <p style="margin-top: 10px; color: #6b7280;">Carregando ocorrências...</p>
+                </div>
+
+                <div id="lista-raias" style="display: none;">
+                    <!-- Preenchido via JS -->
+                </div>
+
+                <div id="empty-state" style="display: none; text-align: center; padding: 40px; color: #6b7280;">
+                    <i class="bi bi-clipboard-x" style="font-size: 3em; color: #d1d5db;"></i>
+                    <p style="margin-top: 15px;">Nenhuma ocorrência RAIA registrada.</p>
+                    <a href="{{ url_for('elaborar_raia_novo') }}" style="color: #dc2626; font-weight: 500;">Criar nova
+                        agora</a>
                 </div>
             </div>
+        </main>
+    </div>
 
-            <div class="panel-overlay" id="panelOverlay"></div>
+    <!-- UPDATE MODAL -->
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="custom-modal" id="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Editar Ocorrência</h3>
+            <button onclick="closeModal()" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body" id="modal-form">
+            <input type="hidden" id="edit_id">
 
-            <div class="side-panel" id="sidePanel">
-                <div class="panel-header">
-                    <h3 class="panel-title">Detalhes da Ocorrência</h3>
-                    <button class="btn-close-panel" id="closePanel">&times;</button>
-                </div>
-                <div class="panel-content" id="panelBody">
-                    <!-- Conteúdo dinâmico -->
-                </div>
+            <div class="detail-row">
+                <label class="detail-label">Status</label>
+                <select id="edit_status" class="edit-input" disabled>
+                    <option value="OPEN">Aberto</option>
+                    <option value="CLOSED">Encerrado</option>
+                </select>
             </div>
+
+            <div class="detail-row">
+                <label class="detail-label">Natureza</label>
+                <input type="text" id="edit_natureza" class="edit-input" disabled>
+            </div>
+
+            <div class="detail-row">
+                <label class="detail-label">Localização (Endereço/Manual)</label>
+                <textarea id="edit_local" class="edit-input" rows="2" disabled></textarea>
+            </div>
+
+            <div class="detail-row">
+                <label class="detail-label">Descrição</label>
+                <textarea id="edit_descricao" class="edit-input" rows="4" disabled></textarea>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+            <p style="font-weight: 600; margin-bottom: 10px; color: #374151;">Responsável no Local</p>
+
+            <div class="detail-row">
+                <label class="detail-label">Nome</label>
+                <input type="text" id="edit_resp_nome" class="edit-input" disabled>
+            </div>
+            <div class="detail-row">
+                <label class="detail-label">Função / Cargo</label>
+                <input type="text" id="edit_resp_cargo" class="edit-input" disabled>
+            </div>
+            <div class="detail-row">
+                <label class="detail-label">Contato</label>
+                <input type="text" id="edit_resp_contato" class="edit-input" disabled>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="btn-delete-modal" class="btn-delete" style="margin-right: auto;" onclick="deleteFromModal()">
+                <i class="bi bi-trash"></i> Excluir
+            </button>
+            <button id="btn-cancel" class="btn-modal-secondary" style="display: none;"
+                onclick="disableEdit()">Cancelar</button>
+            <button id="btn-edit" class="btn-modal-primary" onclick="enableEdit()">
+                <i class="bi bi-pencil"></i> Editar
+            </button>
+            <button id="btn-save" class="btn-modal-primary" style="display: none; background: #16a34a;"
+                onclick="saveEdit()">
+                <i class="bi bi-check-lg"></i> Salvar
+            </button>
         </div>
     </div>
 
     <script>
+        let currentItem = null;
+        let raiaData = [];
+
         document.addEventListener('DOMContentLoaded', () => {
-            const sidePanel = document.getElementById('sidePanel');
-            const panelOverlay = document.getElementById('panelOverlay');
-            const closeBtn = document.getElementById('closePanel');
-
-            function closeSidePanel() {
-                sidePanel.classList.remove('open');
-                panelOverlay.classList.remove('show');
-            }
-
-            closeBtn.onclick = closeSidePanel;
-            panelOverlay.onclick = closeSidePanel;
-
             fetch('/api/raia/me')
                 .then(r => r.json())
                 .then(data => {
-                    const tbody = document.getElementById('occurrences-list');
-                    tbody.innerHTML = '';
+                    raiaData = data;
+                    document.getElementById('loading').style.display = 'none';
+                    const container = document.getElementById('lista-raias');
 
                     if (data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">Nenhuma ocorrência encontrada.</td></tr>';
+                        document.getElementById('empty-state').style.display = 'block';
                         return;
                     }
 
-                    data.forEach(oco => {
-                        const tr = document.createElement('tr');
-                        const date = new Date(oco.created_at).toLocaleString('pt-BR');
-
-                        tr.innerHTML = `
-                            <td>
-                                <div style="font-weight: 500;">${date.split(' ')[0]}</div>
-                                <div style="font-size: 0.85em; color: var(--text-muted);">${date.split(' ')[1]}</div>
-                            </td>
-                            <td>${oco.nature_id || '-'}</td>
-                            <td><div style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${oco.manual_location || oco.address || 'GPS'}</div></td>
-                            <td><span class="badge badge-${oco.status === 'OPEN' ? 'warning' : 'success'}">${oco.status}</span></td>
-                            <td style="text-align: right;">
-                                <button class="btn-secondary btn-sm btn-view" style="border-radius: 50%; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;"><i class="bi bi-chevron-right"></i></button>
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-
-                        // Evento de clique na linha inteira ou botão
-                        tr.addEventListener('click', () => showDetails(oco));
-                        tr.style.cursor = 'pointer';
-                    });
+                    container.style.display = 'block';
+                    renderList(data);
                 })
                 .catch(err => {
                     console.error(err);
-                    document.getElementById('occurrences-list').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red; padding: 2rem;">Erro ao carregar dados.</td></tr>';
+                    document.getElementById('loading').innerHTML = '<p class="text-danger">Erro ao carregar dados.</p>';
                 });
+        });
 
-            function showDetails(oco) {
-                const body = document.getElementById('panelBody');
+        function renderList(data) {
+            const container = document.getElementById('lista-raias');
+            container.innerHTML = '';
 
-                // Formatar fotos
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'raia-card';
+
+                // Status Badge
+                const statusClass = item.status === 'CLOSED' ? 'status-closed' : 'status-open';
+
+                // Formatar data
+                const dateObj = new Date(item.created_at);
+                const dataFormatada = dateObj.toLocaleDateString('pt-BR');
+                const horaFormatada = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                // Responsável
+                let responsavelHtml = '';
+                if (item.has_responsible) {
+                    responsavelHtml = `<div class="detail-item">
+                                    <strong>RESPONSÁVEL</strong>
+                                    ${item.responsible_name || 'N/A'} (${item.responsible_role || ''})
+                                </div>`;
+                }
+
+                // Fotos
                 let photosHtml = '';
-                if (oco.photos && oco.photos.length > 0) {
-                    photosHtml = '<div class="photo-grid">';
-                    oco.photos.forEach(url => {
+                if (item.photos && item.photos.length > 0) {
+                    photosHtml = '<div class="photos-container">';
+                    item.photos.forEach(url => {
                         photosHtml += `<a href="${url}" target="_blank"><img src="${url}" class="photo-thumb"></a>`;
                     });
                     photosHtml += '</div>';
-                } else {
-                    photosHtml = '<p class="detail-value" style="color: var(--text-muted); font-style: italic;">Nenhuma foto anexada.</p>';
                 }
 
-                // Formatar responsável
-                let respHtml = '<div class="detail-group"><div class="detail-value" style="color: var(--text-muted);">Sem responsável no local.</div></div>';
-                if (oco.has_responsible) {
-                    respHtml = `
-                        <div class="detail-group">
-                            <div class="detail-label">Nome</div>
-                            <div class="detail-value">${oco.responsible_name || '-'}</div>
+                // Localização
+                let localizacao = item.manual_location || item.address || 'Localização não informada';
+                if (item.latitude && item.longitude) {
+                    localizacao += ` <a href="https://www.google.com/maps?q=${item.latitude},${item.longitude}" target="_blank" style="color:#2563eb; text-decoration:none;"><i class="bi bi-geo-alt"></i> Mapa</a>`;
+                }
+
+                div.innerHTML = `
+                        <div class="raia-header">
+                            <div class="raia-natureza">
+                                <span class="status-badge ${statusClass}">${item.status || 'OPEN'}</span>
+                                ${item.nature_id || 'Sem Natureza'}
+                            </div>
+                            <div class="raia-data">
+                                <i class="bi bi-calendar"></i> ${dataFormatada} ${horaFormatada}
+                            </div>
                         </div>
-                        <div class="detail-group">
-                            <div class="detail-label">Função / Cargo</div>
-                            <div class="detail-value">${oco.responsible_role || '-'}</div>
+                        
+                        <div class="raia-details">
+                            <div class="detail-item">
+                                <strong>LOCALIZAÇÃO</strong>
+                                ${localizacao}
+                            </div>
+                            ${responsavelHtml}
                         </div>
-                        <div class="detail-group">
-                            <div class="detail-label">Contato</div>
-                            <div class="detail-value">${oco.responsible_contact || '-'}</div>
+                        
+                        <div style="background: #f9fafb; padding: 15px; border-radius: 6px; border: 1px dashed #e5e7eb; margin-top: 10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                <span style="font-size:0.85em; font-weight:600; color:#374151; text-transform:uppercase;">Descrição</span>
+                            </div>
+                            <div style="font-size:0.9em; color:#4b5563; white-space: pre-wrap;">${item.description || 'Sem descrição.'}</div>
+                            ${photosHtml}
+                        </div>
+
+                        <div class="card-actions">
+                            <button class="btn-card-action btn-delete" onclick="deleteMyOccurrence('${item.id}')">
+                                <i class="bi bi-trash"></i> Excluir
+                            </button>
+                            <button class="btn-card-action btn-edit" onclick="openEditModal('${item.id}')">
+                                <i class="bi bi-pencil"></i> Editar / Detalhes
+                            </button>
                         </div>
                     `;
+                container.appendChild(div);
+            });
+        }
+
+        function openEditModal(id) {
+            const item = raiaData.find(i => i.id === id);
+            if (!item) return;
+
+            currentItem = item;
+
+            // Popula campos
+            document.getElementById('edit_id').value = item.id;
+            document.getElementById('edit_status').value = item.status || 'OPEN';
+            document.getElementById('edit_natureza').value = item.nature_id || '';
+            document.getElementById('edit_local').value = item.manual_location || item.address || '';
+            document.getElementById('edit_descricao').value = item.description || '';
+
+            document.getElementById('edit_resp_nome').value = item.responsible_name || '';
+            document.getElementById('edit_resp_cargo').value = item.responsible_role || '';
+            document.getElementById('edit_resp_contato').value = item.responsible_contact || '';
+
+            disableEdit(); // Garante estado inicial
+
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function enableEdit() {
+            const inputs = document.querySelectorAll('.edit-input');
+            inputs.forEach(input => input.disabled = false);
+
+            document.getElementById('btn-edit').style.display = 'none';
+            document.getElementById('btn-save').style.display = 'flex';
+            document.getElementById('btn-cancel').style.display = 'flex';
+            document.getElementById('btn-delete-modal').style.display = 'none';
+        }
+
+        function disableEdit() {
+            const inputs = document.querySelectorAll('.edit-input');
+            inputs.forEach(input => input.disabled = true);
+
+            document.getElementById('btn-edit').style.display = 'flex';
+            document.getElementById('btn-save').style.display = 'none';
+            document.getElementById('btn-cancel').style.display = 'none';
+            document.getElementById('btn-delete-modal').style.display = 'flex';
+        }
+
+        async function saveEdit() {
+            const id = document.getElementById('edit_id').value;
+            const btnSave = document.getElementById('btn-save');
+            const originalText = btnSave.innerHTML;
+
+            btnSave.innerHTML = '<i class="bi bi-hourglass-split"></i> Salvando...';
+            btnSave.disabled = true;
+
+            const payload = {
+                status: document.getElementById('edit_status').value,
+                nature_id: document.getElementById('edit_natureza').value,
+                manual_location: document.getElementById('edit_local').value,
+                description: document.getElementById('edit_descricao').value,
+                has_responsible: true, // Se editou, assume que quer salvar os campos
+                responsible_name: document.getElementById('edit_resp_nome').value,
+                responsible_role: document.getElementById('edit_resp_cargo').value,
+                responsible_contact: document.getElementById('edit_resp_contato').value
+            };
+
+            try {
+                const res = await fetch(`/api/raia/update/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const json = await res.json();
+
+                if (json.success) {
+                    alert('Atualizado com sucesso!');
+                    location.reload();
+                } else {
+                    alert('Erro ao atualizar: ' + (json.error || 'Erro desconhecido'));
                 }
-
-                body.innerHTML = `
-                    <div class="detail-group">
-                        <div class="detail-label">ID da Ocorrência</div>
-                        <div class="detail-value" style="font-family: monospace;">${oco.id}</div>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <div class="detail-label">Data e Hora</div>
-                        <div class="detail-value">${new Date(oco.created_at).toLocaleString('pt-BR')}</div>
-                    </div>
-
-                    <div class="detail-group">
-                        <div class="detail-label">Natureza</div>
-                        <div class="detail-value" style="font-weight: 600;">${oco.nature_id || '-'}</div>
-                    </div>
-
-                    <div class="detail-group">
-                        <div class="detail-label">Status</div>
-                        <div class="detail-value"><span class="badge badge-${oco.status === 'OPEN' ? 'warning' : 'success'}">${oco.status}</span></div>
-                    </div>
-
-                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
-
-                    <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Localização</h4>
-                    <div class="detail-group">
-                        <div class="detail-label">Endereço / Referência</div>
-                        <div class="detail-value">${oco.manual_location || oco.address || '-'}</div>
-                    </div>
-                    <div class="detail-group">
-                        <div class="detail-label">Coordenadas</div>
-                            ${(() => {
-                        let lat = oco.latitude;
-                        let lng = oco.longitude;
-
-                        // Se não tiver coordenadas explícitas, tentar extrair do endereço/local manual
-                        if (!lat || !lng || String(lat) === 'None') {
-                            const text = oco.manual_location || oco.address || '';
-                            // Regex para procurar padrão "lat, long" (ex: -22.123, -47.456)
-                            const match = text.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
-                            if (match) {
-                                lat = match[1];
-                                lng = match[2];
-                            }
-                        }
-
-                        if (lat && lng && String(lat) !== 'None' && String(lng) !== 'None') {
-                            return `<a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" style="color: #0044cc; text-decoration: none; font-weight: 500;">
-                                        <i class="bi bi-geo-alt-fill"></i> ${lat}, ${lng} <i class="bi bi-box-arrow-up-right" style="font-size: 0.8em; margin-left: 4px;"></i>
-                                    </a>`;
-                        }
-                        return '-';
-                    })()}
-                    </div>
-
-                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
-
-                    <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Descrição</h4>
-                    <div class="detail-group">
-                        <div class="detail-value" style="white-space: pre-wrap;">${oco.description || 'Sem descrição.'}</div>
-                    </div>
-
-                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
-
-                    <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Responsável no Local</h4>
-                    ${respHtml}
-
-                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
-
-                    <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Fotos</h4>
-                    ${photosHtml}
-
-                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
-
-                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                        <button onclick="deleteMyOccurrence('${oco.id}')" class="btn-secondary" style="color: #dc2626; border-color: #dc2626;">
-                            <i class="bi bi-trash"></i> Excluir
-                        </button>
-                    </div>
-                `;
-
-                sidePanel.classList.add('open');
-                panelOverlay.classList.add('show');
+            } catch (error) {
+                console.error(error);
+                alert('Erro de conexão ao salvar.');
+            } finally {
+                btnSave.innerHTML = originalText;
+                btnSave.disabled = false;
             }
-
-        });
+        }
 
         async function deleteMyOccurrence(id) {
             if (!confirm('ATENÇÃO: Tem certeza que deseja excluir esta ocorrência?')) return;
@@ -424,6 +609,12 @@
                 }
             } catch (e) {
                 alert('Erro de conexão');
+            }
+        }
+
+        function deleteFromModal() {
+            if (currentItem) {
+                deleteMyOccurrence(currentItem.id);
             }
         }
     </script>
