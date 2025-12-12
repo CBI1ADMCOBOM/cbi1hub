@@ -1,0 +1,22 @@
+services:
+  cbi1app:
+    build: .
+    image: cbi1hub-web:latest
+    container_name: cbi1app
+    restart: always
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    volumes:
+      # Persistir logs e uploads (se houver)
+      - ./output.log:/app/output.log
+      - ./static/uploads:/app/static/uploads
+      - ./:/app
+    networks:
+      cobom_network:
+        ipv4_address: 172.20.0.193
+
+networks:
+  cobom_network:
+    external: true

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBI-1 APP - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .form-group label {
+            font-size: 1rem !important;
+            font-weight: 700 !important;
+            color: #374151 !important;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .logo {
+            white-space: nowrap;
+            /* Impede quebra de linha no título */
+        }
+
+        .btn-login {
+            padding: 1rem !important;
+            font-size: 1.15rem !important;
+            font-weight: 800 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.5);
+            transition: all 0.2s ease-in-out !important;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px -1px rgba(220, 38, 38, 0.6);
+            filter: brightness(1.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 60px; width: auto;">
+                    <span style="font-size: 1.8rem;">BOMBEIROS CBI-1</span>
+                </div>
+                <p>Sistema Integrado de Gestão</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">E-mail</label>
+                    <input type="email" id="username" name="username" placeholder="Digite seu e-mail funcional"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+                </div>
+                <div class="form-actions">
+                    <a href="{{ url_for('auth.forgot_password_page') }}" id="forgot-password">Esqueci minha senha</a>
+                </div>
+                <button type="submit" class="btn-login">Entrar</button>
+            </form>
+            <div class="login-footer" style="margin-top: 2rem;">
+                <button type="button" class="btn-manual"
+                    style="background-color: #4b5563; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: default; width: 100%; margin-bottom: 15px;">
+                    <i class="bi bi-book-fill" style="margin-right: 8px;"></i> Manual de Instrução
+                </button>
+                <p>Não tem cadastro? <a href="{{ url_for('auth.signup_page') }}" id="signup-link">Criar conta</a></p>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

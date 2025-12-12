@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Inconsistências - CBI-1</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .list-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-muted);
+            background: #f8fafc;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-op {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-tec {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+        .side-panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .side-panel-overlay.visible {
+            display: block;
+            opacity: 1;
+        }
+
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: -520px;
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            background: white;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+            z-index: 2001;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.3s;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            visibility: hidden;
+        }
+
+        .side-panel.open {
+            right: 0;
+            visibility: visible;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0s;
+        }
+
+        .side-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #f1f5f9;
+            color: var(--text-color);
+        }
+
+        .detail-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .delete-section {
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            padding-top: 2rem;
+        }
+
+        .btn-delete {
+            width: 100%;
+            padding: 0.75rem;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-delete:hover {
+            background: #fecaca;
+        }
+
+        .btn-icon-delete {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background 0.2s;
+            margin-right: 0.5rem;
+        }
+
+        .btn-icon-delete:hover {
+            background: #fee2e2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 40px; width: auto;">
+                    <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                            Histórico Inconsistência</span></span>
+                </div>
+                <div class="user-menu" style="display: flex; gap: 10px;">
+                    <a href="{{ url_for('inconsistencias.gerar_inconsistencia_novo') }}" class="header-icon-btn">
+                        <i class="bi bi-plus-lg"></i> Nova
+                    </a>
+                    <a href="{{ url_for('inconsistencias.gerar_inconsistencia') }}" class="header-icon-btn">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main class="app-content">
+            <div class="list-container">
+                <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="font-weight: 700; color: var(--primary-color); margin: 0;">Histórico de Inconsistências
+                    </h2>
+                </div>
+
+                {% if items %}
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Talão</th>
+                                <th>Tipo</th>
+                                <th>Motivo</th>
+                                <th>Detalhes</th>
+                                <th>Status</th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr onclick="handleRowClick(this)" data-item='{{ item | tojson | safe }}'
+                                style="cursor: pointer; transition: background 0.1s;"
+                                onmouseover="this.style.background='#f8fafc'"
+                                onmouseout="this.style.background='white'">
+                                <td>{{ item.data_ocorrencia }}</td>
+                                <td>{{ item.talao_numero or '-' }}</td>
+                                <td>
+                                    <span class="badge {{ 'badge-op' if item.tipo == 'OPERACIONAL' else 'badge-tec' }}">
+                                        {{ item.tipo }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if item.tipo == 'OPERACIONAL' %}
+                                    {% if item.motivo_op_descricao %}
+                                    {{ item.motivo_op_descricao }}
+                                    {% else %}
+                                    {{ item.motivo_op_codigo }}
+                                    {% endif %}
+                                    {% else %}
+                                    {% if item.motivo_tec_descricao %}
+                                    {{ item.motivo_tec_descricao }}
+                                    {% else %}
+                                    {{ item.motivo_tec_codigo }}
+                                    {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.motivo_tec_codigo == 'T4_193' %}
+                                    <small class="text-muted">193 ({{ item.t4_falha }})</small>
+                                    {% elif item.motivo_tec_codigo == 'T4_APP' %}
+                                    <small class="text-muted">App ({{ item.t4_sistema_afetado }})</small>
+                                    {% endif %}
+                                    {% if item.observacao %}
+                                    <div
+                                        style="font-size: 0.85em; color: #666; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.25rem;">
+                                        {{ item.observacao }}
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span style="color: green; font-weight: 500;">Registrado</span>
+                                </td>
+                                <td style="text-align: right; white-space: nowrap;">
+                                    <button class="btn-icon-delete"
+                                        onclick="event.stopPropagation(); deleteItemDirectly('{{ item.id }}')"
+                                        title="Excluir">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    <i class="bi bi-chevron-right" style="color: #ccc;"></i>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 4rem; color: var(--text-muted);">
+                    <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.5;"></i>
+                    <p style="margin-top: 1rem;">Nenhuma inconsistência registrada.</p>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Side Panel -->
+    <div class="side-panel-overlay" id="overlay" onclick="closeDetails()"></div>
+    <div class="side-panel" id="sidePanel">
+        <div class="side-panel-header">
+            <h3 style="margin: 0; font-weight: 700; color: var(--primary-color);">Detalhes</h3>
+            <button class="close-btn" onclick="closeDetails()">&times;</button>
+        </div>
+
+        <div id="panelContent">
+            <!-- Preenchido via JS -->
+        </div>
+
+        <div class="delete-section">
+            <button class="btn-delete" onclick="deleteItem()">
+                <i class="bi bi-trash"></i> Excluir Registro
+            </button>
+        </div>
+    </div>
+    <script>
+        let currentItemId = null;
+
+        function handleRowClick(row) {
+            try {
+                const item = JSON.parse(row.dataset.item);
+                openDetails(item);
+            } catch (e) {
+                console.error('Erro ao abrir detalhes:', e);
+            }
+        }
+
+        function openDetails(item) {
+            currentItemId = item.id;
+            const panel = document.getElementById('sidePanel');
+            const overlay = document.getElementById('overlay');
+            const content = document.getElementById('panelContent');
+
+            // Montar conteúdo
+            let html = `
+                <div class="detail-group">
+                    <div class="detail-label">Data e Hora</div>
+                    <div class="detail-value">${item.data_ocorrencia}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Talão</div>
+                    <div class="detail-value">${item.talao_numero || 'N/A'}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Tipo</div>
+                    <div class="detail-value">
+                        <span class="badge ${item.tipo === 'OPERACIONAL' ? 'badge-op' : 'badge-tec'}">
+                            ${item.tipo}
+                        </span>
+                    </div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Motivo</div>
+                    <div class="detail-value">
+                        ${item.tipo === 'OPERACIONAL'
+                    ? (item.motivo_op_descricao || item.motivo_op_codigo)
+                    : (item.motivo_tec_descricao || item.motivo_tec_codigo)}
+                    </div>
+                </div>
+            `;
+
+            if (item.tipo === 'TECNICA') {
+                if (item.motivo_tec_codigo === 'T4_193') {
+                    html += `
+                        <div class="detail-group">
+                            <div class="detail-label">Detalhes T4</div>
+                            <div class="detail-value">
+                                Origem: ${item.t4_origem || '-'}<br>
+                                Operadora: ${item.t4_operadora || '-'}<br>
+                                Número: ${item.t4_numero || '-'}<br>
+                                Falha: ${item.t4_falha || '-'}
+                            </div>
+                        </div>
+                    `;
+                } else if (item.motivo_tec_codigo === 'T4_APP') {
+                    html += `
+                        <div class="detail-group">
+                            <div class="detail-label">Sistema Afetado</div>
+                            <div class="detail-value">${item.t4_sistema_afetado || '-'}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            if (item.observacao) {
+                html += `
+                    <div class="detail-group">
+                        <div class="detail-label">Observações</div>
+                        <div class="detail-value" style="white-space: pre-wrap;">${item.observacao}</div>
+                    </div>
+                `;
+            }
+
+            content.innerHTML = html;
+
+            // Mostrar painel
+            overlay.classList.add('visible');
+            setTimeout(() => {
+                panel.classList.add('open');
+            }, 10);
+        }
+
+        function closeDetails() {
+            const panel = document.getElementById('sidePanel');
+            const overlay = document.getElementById('overlay');
+
+            panel.classList.remove('open');
+            setTimeout(() => {
+                overlay.classList.remove('visible');
+            }, 300);
+        }
+
+        async function deleteItem() {
+            if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+
+            await performDelete(currentItemId);
+        }
+
+        async function deleteItemDirectly(id) {
+            if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+            await performDelete(id);
+        }
+
+        async function performDelete(id) {
+            try {
+                const res = await fetch(`/api/inconsistencias/${id}`, { method: 'DELETE' });
+                const result = await res.json();
+
+                if (result.success) {
+                    window.location.reload();
+                } else {
+                    alert('Erro ao excluir: ' + (result.error || 'Erro desconhecido'));
+                }
+            } catch (e) {
+                alert('Erro de conexão.');
+            }
+        }
+    </script>
+</body>
+
+</html>

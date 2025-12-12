@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuvas Intensas - Menu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .options-grid {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .option-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-color);
+            width: 250px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            border-color: #dc2626;
+            /* Cor vermelha para chuvas */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-icon {
+            font-size: 3rem;
+            color: #dc2626;
+            /* Cor vermelha */
+            margin-bottom: 0.5rem;
+        }
+
+        .option-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}"
+                        style="height: 40px; width: auto;">
+                    <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                            Chuvas Intensas</span></span>
+                </div>
+                <div class="user-menu">
+                    <a href="{{ url_for('main.dashboard') }}" class="header-icon-btn" title="Voltar ao Início">
+                        <i class="bi bi-house-door-fill"></i>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main class="app-content">
+            <div style="text-align: center; margin-bottom: 2rem; color: white;">
+                <h2 style="font-weight: 700;">Gestão de Chuvas Intensas</h2>
+                <p style="opacity: 0.9;">Monitoramento e registro de eventos.</p>
+            </div>
+
+            <div class="options-grid">
+                <a href="{{ url_for('chuvas.chuvas_intensas_novo') }}" class="option-card">
+                    <i class="bi bi-cloud-plus-fill option-icon"></i>
+                    <div class="option-title">Lançar Ocorrência</div>
+                    <div class="option-desc">Registrar nova ocorrência relacionada a chuvas.</div>
+                </a>
+
+                <a href="{{ url_for('chuvas.chuvas_intensas_selecao') }}" class="option-card">
+                    <i class="bi bi-list-stars option-icon"></i>
+                    <div class="option-title">Painel Geral</div>
+                    <div class="option-desc">Visualizar ocorrências por Grupamento (GB).</div>
+                </a>
+
+                <a href="{{ url_for('chuvas.chuvas_intensas_listar') }}" class="option-card">
+                    <i class="bi bi-journal-text option-icon"></i>
+                    <div class="option-title">Minhas Ocorrências</div>
+                    <div class="option-desc">Visualizar seus registros lançados.</div>
+                </a>
+            </div>
+</body>
+
+</html>

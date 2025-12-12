@@ -1,0 +1,305 @@
+<script>
+  // Variável Global para armazenar a hierarquia lida da Planilha Google
+  let HIERARQUIA_BOMBEIROS = {};
+
+
+  // --- Funções Auxiliares de Filtro de Unidades ---
+
+  /**
+   * Função auxiliar para limpar selects (mantém apenas o placeholder).
+   */
+  function limparSelect(selectElement) {
+    // Mantém apenas a primeira opção (o placeholder/Selecione)
+    while (selectElement.options.length > 1) {
+      selectElement.remove(1);
+    }
+    // Reseta o valor para o placeholder, se houver, ou para vazio
+    selectElement.value = selectElement.options.length > 0 ? selectElement.options[0].value : ''; 
+  }
+
+  /**
+   * 1. Popula o GB com base nos dados carregados.
+   */
+  function popularGB() {
+      const gbSelect = document.getElementById('gb');
+      // Obtém as chaves de nível superior (GBs) e ordena
+      const gbList = Object.keys(HIERARQUIA_BOMBEIROS).sort(); 
+      
+      limparSelect(gbSelect); 
+      
+      gbList.forEach(gb => {
+          const newOption = document.createElement('option');
+          newOption.value = gb;
+          newOption.textContent = gb;
+          gbSelect.appendChild(newOption);
+      });
+
+      // Força a limpeza inicial de SGB e EB
+      popularSGB(); 
+  }
+
+  /**
+   * 2. Filtra SGBs com base no GB selecionado.
+   */
+  function popularSGB() {
+    const gbSelect = document.getElementById('gb');
+    const sgbSelect = document.getElementById('sgb');
+    const ebSelect = document.getElementById('estacaoAtendimento');
+    
+    const gbSelecionado = gbSelect.value;
+    
+    // Limpa e reseta os selects de SGB e EB
+    limparSelect(sgbSelect);
+    limparSelect(ebSelect);
+    
+    // Apenas popular se um GB válido foi selecionado
+    if (gbSelecionado && HIERARQUIA_BOMBEIROS[gbSelecionado]) {
+      // As chaves no próximo nível são os SGBs formatados (ex: "1º SGB")
+      const sgbList = Object.keys(HIERARQUIA_BOMBEIROS[gbSelecionado]).sort();
+      
+      sgbList.forEach(sgb => {
+        const newOption = document.createElement('option');
+        newOption.value = sgb;
+        newOption.textContent = sgb;
+        sgbSelect.appendChild(newOption);
+      });
+    }
+    
+    // Força a atualização (limpeza/população) do campo EB
+    popularEB(); 
+  }
+
+  /**
+   * 3. Filtra EBs com base no GB e SGB selecionados.
+   */
+  function popularEB() {
+    const gbSelect = document.getElementById('gb');
+    const sgbSelect = document.getElementById('sgb');
+    const ebSelect = document.getElementById('estacaoAtendimento');
+    
+    const gbSelecionado = gbSelect.value;
+    const sgbSelecionado = sgbSelect.value;
+    
+    // Limpa e reseta o select de EB
+    limparSelect(ebSelect);
+    
+    // Busca a lista de EBs
+    const sgbData = HIERARQUIA_BOMBEIROS[gbSelecionado] ? HIERARQUIA_BOMBEIROS[gbSelecionado][sgbSelecionado] : null;
+
+    if (sgbData && sgbData.length > 0) {
+      sgbData.sort().forEach(eb => { // Opcional: ordenar as EBs
+        const newOption = document.createElement('option');
+        newOption.value = eb;
+        newOption.textContent = eb;
+        ebSelect.appendChild(newOption);
+      });
+    }
+  }
+
+
+  // --- Funções Auxiliares de Interface ---
+
+  /**
+   * Controla a visibilidade dos campos de Data/Hora de Término
+   * com base no status da ocorrência.
+   */
+  function toggleCamposTermino() {
+      const status = document.getElementById('statusTermino').value;
+      const campos = document.getElementById('camposTermino');
+      const dataTermino = document.getElementById('dataTermino');
+      const horaTermino = document.getElementById('horaTermino');
+
+      if (status === 'ENCERRADA') {
+          campos.style.display = 'block';
+          dataTermino.required = true;
+          horaTermino.required = true;
+      } else {
+          // Limpa e torna não-obrigatório para "EM ATENDIMENTO"
+          campos.style.display = 'none';
+          dataTermino.required = false;
+          horaTermino.required = false;
+          dataTermino.value = '';
+          horaTermino.value = '';
+      }
+  }
+  
+  /**
+   * Lida com o preenchimento automático do campo de QRA do Oficial
+   * quando a opção "NÃO HOUVE OFICIAL NO LOCAL" é selecionada.
+   */
+  function handleOficialLocalChange() {
+    const rankSelect = document.getElementById('rankOficiaisLocal');
+    const nomeInput = document.getElementById('nomeOficiaisLocal');
+    
+    const valorSelecionado = rankSelect.value;
+    const textoPadrao = "Não houve oficial no local";
+
+    if (valorSelecionado === "NÃO HOUVE OFICIAL NO LOCAL") {
+      nomeInput.value = textoPadrao;
+      nomeInput.disabled = true;
+      nomeInput.required = false; 
+    } else {
+      // Limpa e habilita se qualquer outro posto for selecionado
+      nomeInput.value = "";
+      nomeInput.disabled = false;
+      nomeInput.required = true;
+    }
+  }
+  
+
+  // --- Funções de Comunicação com o Servidor (Apps Script) ---
+  
+  /**
+   * Função chamada quando os dados da hierarquia são carregados com sucesso.
+   */
+  function onUnidadesLoaded(hierarquia) {
+      HIERARQUIA_BOMBEIROS = hierarquia;
+      console.log("Hierarquia de unidades carregada com sucesso!", HIERARQUIA_BOMBEIROS);
+      
+      // 1. Inicia o filtro, populando o primeiro Select (GB)
+      popularGB(); 
+
+      // 2. Funções de interface que dependiam do carregamento da página
+      toggleCamposTermino(); 
+      handleOficialLocalChange();
+      
+      // 3. Remove a mensagem de carregamento, se houver
+      const mensagem = document.getElementById('mensagemCopia');
+      if (mensagem.textContent === 'Carregando unidades... Aguarde.') {
+          mensagem.textContent = 'Aguardando geração do relatório.';
+          mensagem.className = 'info';
+      }
+  }
+
+  /**
+   * Função chamada em caso de falha ao carregar a hierarquia.
+   */
+  function onLoadError(error) {
+      console.error("Erro ao carregar a base de dados das unidades:", error);
+      alert("ERRO CRÍTICO: Não foi possível carregar a base de dados das unidades. Verifique o log do Apps Script.");
+      
+      // Exibe erro na interface
+      const mensagem = document.getElementById('mensagemCopia');
+      mensagem.textContent = 'ERRO CRÍTICO: Falha ao carregar unidades. Verifique o Console (F12).';
+      mensagem.className = 'error';
+      
+      // Desabilita os selects de unidade
+      document.getElementById('gb').innerHTML = '<option value="">ERRO DE CARREGAMENTO</option>';
+      document.getElementById('gb').disabled = true;
+      document.getElementById('sgb').disabled = true;
+      document.getElementById('estacaoAtendimento').disabled = true;
+  }
+
+  /**
+   * Envia os dados do formulário para o Google Apps Script para processamento.
+   */
+  function processarDados() {
+    const form = document.getElementById('formularioOcorrencia');
+    if (!form.checkValidity()) {
+      // Se o formulário for inválido, dispara a validação nativa do HTML5
+      form.reportValidity();
+      return;
+    }
+
+    const mensagem = document.getElementById('mensagemCopia');
+    mensagem.textContent = 'Gerando relatório... Aguarde.';
+    mensagem.className = 'info';
+
+    // Coleta todos os dados do formulário em um objeto simples
+    const formData = new FormData(form);
+    const data = {};
+    for (const [key, value] of formData.entries()) {
+      data[key] = value;
+    }
+
+    // Chama a função do lado do servidor (codigo.gs)
+    google.script.run
+      .withSuccessHandler(onSuccess)
+      .withFailureHandler(onFailure)
+      .gerarRelatorio(data);
+  }
+
+  /**
+   * Lida com o sucesso da chamada ao servidor.
+   * @param {string} resultado O texto do relatório retornado pelo servidor.
+   */
+  function onSuccess(resultado) {
+    document.getElementById('saidaTexto').value = resultado;
+    const mensagem = document.getElementById('mensagemCopia');
+    mensagem.textContent = 'Relatório gerado com sucesso! Utilize o botão "Copiar Texto".';
+    mensagem.className = 'success';
+  }
+
+  /**
+   * Lida com o erro da chamada ao servidor.
+   * @param {Error} erro O objeto de erro retornado pelo servidor.
+   */
+  function onFailure(erro) {
+    document.getElementById('saidaTexto').value = 'ERRO NA GERAÇÃO DO RELATÓRIO: ' + erro.message;
+    const mensagem = document.getElementById('mensagemCopia');
+    mensagem.textContent = 'Erro ao gerar relatório. Veja os detalhes na caixa de texto.';
+    mensagem.className = 'error';
+    console.error('Erro do servidor:', erro);
+  }
+
+  // --- Funções de Utilidade (Cópia) ---
+
+  /**
+   * Copia o conteúdo da área de texto de saída para a área de transferência.
+   */
+  function copiarTexto() {
+    const saida = document.getElementById('saidaTexto');
+    const mensagem = document.getElementById('mensagemCopia');
+
+    if (!saida.value) {
+      mensagem.textContent = 'A caixa de texto está vazia. Gere o relatório primeiro!';
+      mensagem.className = 'error';
+      return;
+    }
+
+    // Tenta usar a API Clipboard (mais moderna)
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(saida.value).then(() => {
+        mensagem.textContent = 'Texto copiado para a área de transferência!';
+        mensagem.className = 'success';
+      }).catch(err => {
+        // Fallback se a API falhar
+        executarCopiaFallback(saida, mensagem);
+      });
+    } else {
+      // Fallback para navegadores mais antigos
+      executarCopiaFallback(saida, mensagem);
+    }
+  }
+
+  /**
+   * Método de cópia de fallback usando execCommand (necessário em alguns ambientes iframed).
+   */
+  function executarCopiaFallback(saida, mensagem) {
+    saida.select();
+    saida.setSelectionRange(0, 99999); // Para mobile
+    try {
+        document.execCommand('copy');
+        mensagem.textContent = 'Texto copiado para a área de transferência (método fallback)!';
+        mensagem.className = 'success';
+    } catch (err) {
+        mensagem.textContent = 'Falha ao copiar o texto. Por favor, copie manualmente.';
+        mensagem.className = 'error';
+        console.error('Erro de cópia fallback:', err);
+    }
+  }
+
+  // --- INICIALIZAÇÃO ---
+  document.addEventListener('DOMContentLoaded', () => {
+      // Exibe mensagem de carregamento
+      document.getElementById('mensagemCopia').textContent = 'Carregando unidades... Aguarde.';
+      document.getElementById('mensagemCopia').className = 'info';
+      
+      // Chamada Assíncrona para o Apps Script (Code.gs) para buscar a hierarquia
+      google.script.run
+        .withSuccessHandler(onUnidadesLoaded) 
+        .withFailureHandler(onLoadError)      
+        .getUnidades();
+  });
+
+</script>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <?!= include('Estilos'); ?> 
+  <?!= include('Javascript'); ?> 
+</head>
+<body>
+
+  <h2>Gerador de Relatório de Destaque / Vulto CBI-1</h2>
+  <p>Preencha os campos abaixo para gerar o texto formatado.</p>
+
+  <form id="formularioOcorrencia">
+
+    <div class="unidades-group">
+        
+        <div>
+            <label for="gb">Unidade: GB (Grupamento de Bombeiros):</label>
+            <select id="gb" name="gb" required onchange="popularSGB()">
+                <option value="">Selecione o GB</option> 
+            </select>
+        </div>
+
+        <div>
+            <label for="sgb">Unidade: SGB (Subgrupamento de Bombeiros):</label>
+            <select id="sgb" name="sgb" required onchange="popularEB()">
+                <option value="">Selecione o SGB</option>
+            </select>
+        </div>
+        
+        <div>
+            <label for="estacaoAtendimento">Unidade: Estação de Bombeiros (EB):</label>
+            <select id="estacaoAtendimento" name="estacaoAtendimento" required>
+                <option value="">Selecione a Estação</option>
+            </select>
+        </div>
+
+    </div>
+    <hr>
+
+    <label for="numOcorrencia">A. Número Ocorrência (Talão):</label>
+    <input type="text" id="numOcorrencia" name="numOcorrencia" required>
+
+    <label for="dataOcorrencia">B. Data da Ocorrência (Início):</label>
+    <input type="date" id="dataOcorrencia" name="dataOcorrencia" required>
+    
+    <label for="horaOcorrencia">B. Hora da Ocorrência (Início):</label>
+    <input type="time" id="horaOcorrencia" name="horaOcorrencia" required>
+
+    <label for="statusTermino">C. Status da ocorrência:</label>
+    <select id="statusTermino" name="statusTermino" required onchange="toggleCamposTermino()">
+        <option value="EM ATENDIMENTO">EM ATENDIMENTO</option>
+        <option value="ENCERRADA">ENCERRADA</option>
+    </select>
+    
+    <div id="camposTermino" class="campos-termino" style="display:none;">
+        <label for="dataTermino">C. Data do Término:</label>
+        <input type="date" id="dataTermino" name="dataTermino">
+        
+        <label for="horaTermino">C. Hora do Término:</label>
+        <input type="time" id="horaTermino" name="horaTermino">
+    </div>
+
+    <label for="tipoOcorrencia">D. Tipo De Ocorrência (Justificativa Vulto/Destaque):</label>
+    <select id="tipoOcorrencia" name="tipoOcorrencia" required>
+        <option value="">Selecione a Justificativa</option>
+        <option value="5 VÍTIMAS OU MAIS (SOCORRIDAS OU FATAIS)">5 Vítimas ou mais (Socorridas ou Fatais)</option>
+        <option value="ENVOLVENDO INSTITUIÇÃO PÚBLICA">Envolvendo Instituição Pública (Poderes, Delegacias, Escolas, Hospitais, etc)</option>
+        <option value="ENVOLVENDO INSTITUIÇÃO FINANCEIRA">Envolvendo Instituição Financeira (Atentado Explosivo / Incêndio)</option>
+        <option value="ENVOLVENDO MEIO DE TRANSPORTE">Envolvendo meio de transporte (Aeronáutico, Ferroviário, Coletivo, etc)</option>
+        <option value="TÍPICAS DE OPERAÇÕES SAZONAIS">Típicas de operações sazonais (Verão ou Corta Fogo)</option>
+        <option value="MAIS DE 10 VIATURAS NO CBM E 7 NO CBI">Mais de 10 viaturas no CBM e 7 no CBI</option>
+        <option value="ENVOLVENDO MAIS DE UM GB DO CBI">Envolvendo mais de um GB do CBI</option>
+        <option value="ENVOLVENDO AUTORIDADE OU PERSONALIDADE">Envolvendo Autoridade ou Personalidade (Poderes ou Soc. Civil)</option>
+        <option value="ENVOLVENDO INTEGRANTES DA PMESP">Envolvendo Integrantes da PMESP</option>
+        <option value="ENVOLVENDO OFICIAIS SUPERIORES DA PMESP">Envolvendo Oficiais Superiores da PMESP (Inclusive Inativos)</option>
+        <option value="ENVOLVENDO VIATURA DO CB">Envolvendo viatura do CB (Acidente de Trânsito)</option>
+        <option value="ENVOLVENDO PRODUTOS PERIGOSOS">Envolvendo Produtos Perigosos (3 VTRs ou +, Oficial CB e/ou Órgãos de Apoio)</option>
+        <option value="INTERDIÇÃO DE VIA POR MAIS DE 1H">Interdição de via urbana importante ou rodovia por mais de 1h</option>
+        <option value="MORTE DE POLICIAL MILITAR EM SERVIÇO OU FOLGA">Morte de Policial Militar em serviço ou folga</option>
+        <option value="MORTE DE POLICIAL CIVIL EM SERVIÇO">Morte de Policial Civil em Serviço</option>
+        <option value="MDIP/LCDIP (CONFRONTO)">MDIP/LCDIP (Confronto) com atuação do CB</option>
+        <option value="REPERCUSSÃO NA MÍDIA">Repercussão na mídia (Múltiplos canais)</option>
+        <option value="INCÊNDIO COM VÍTIMA FATAL">Incêndio com vítima fatal</option>
+    </select>
+
+    <label for="natureza">E. Natureza da Ocorrência:</label>
+    <select id="natureza" name="natureza" required>
+        <option value="">Selecione a Natureza</option>
+        <option value="A05 - AGRESSÃO">A05 - AGRESSÃO</option>
+        <option value="A22 - SUICÍDIO ARMA DE FOGO">A22 - SUICÍDIO ARMA DE FOGO</option>
+        <option value="A23 - TENTATIVA DE SUICÍDIO">A23 - TENTATIVA DE SUICÍDIO</option>
+        <option value="A24 - AFOGAMENTO EM CURSO">A24 - AFOGAMENTO EM CURSO</option>
+        <option value="E07 - APOIO">E07 - APOIO</option>
+        <option value="L06 - INTERDIÇÃO DE VIA PÚBLICA">L06 - INTERDIÇÃO DE VIA PÚBLICA</option>
+        <option value="L07 - ATROPELAMENTO">L07 - ATROPELAMENTO</option>
+        <option value="L08 - ACIDENTE DE TRÂNSITO COM VÍTIMA">L08 - ACIDENTE DE TRÂNSITO COM VÍTIMA</option>
+        <option value="L09 - ACIDENTE DE TRÂNSITO SEM VÍTIMA">L09 - ACIDENTE DE TRÂNSITO SEM VÍTIMA</option>
+        <option value="L10 - ACIDENTE DE TRÂNSITO COM PM">L10 - ACIDENTE DE TRÂNSITO COM PM</option>
+        <option value="L28 - ACIDENTE DE TRÂNSITO COM VÍTIMA PRESA">L28 - ACIDENTE DE TRÂNSITO COM VÍTIMA PRESA</option>
+        <option value="M01 - OCORRÊNCIA COM PESSOA">M01 - OCORRÊNCIA COM PESSOA</option>
+        <option value="M10 - DESMORONAMENTO">M10 - DESMORONAMENTO</option>
+        <option value="M15 - QUEDA DE PESSOA">M15 - QUEDA DE PESSOA</option>
+        <option value="M16 - ACIDENTE PESSOAL">M16 - ACIDENTE PESSOAL</option>
+        <option value="M22 - EMERGÊNCIA CLÍNICA">M22 - EMERGÊNCIA CLÍNICA</option>
+        <option value="N01 - INCÊNDIO">N01 - INCÊNDIO</option>
+        <option value="N02 - EXPLOSÃO">N02 - EXPLOSÃO</option>
+        <option value="N04 - VAZAMENTO/ PRODUTOS PERIGOSOS">N04 - VAZAMENTO/ PRODUTOS PERIGOSOS</option>
+        <option value="N06 - OCORRÊNCIA COM ÁRVORE">N06 - OCORRÊNCIA COM ÁRVORE</option>
+        <option value="N08 - ACIDENTE COM MEIO DE TRANSPORTE">N08 - ACIDENTE COM MEIO DE TRANSPORTE</option>
+        <option value="N10 - DESABAMENTO/DESMORONAMENTO/SOTERRAMENTO">N10 - DESABAMENTO/DESMORONAMENTO/SOTERRAMENTO</option>
+        <option value="N11 - DESABAMENTOS">N11 - DESABAMENTOS</option>
+        <option value="N13 - OCORRÊNCIA COM OBJETO">N13 - OCORRÊNCIA COM OBJETO</option>
+        <option value="N14 - INUNDAÇÃO/ENCHENTE">N14 - INUNDAÇÃO/ENCHENTE</option>
+        <option value="N15 - QUEDA">N15 - QUEDA</option>
+        <option value="N16 - EMBARCAÇÃO EM SITUAÇÃO DE RISCO">N16 - EMBARCAÇÃO EM SITUAÇÃO DE RISCO</option>
+        <option value="N24 - VAZAMENTO DE GLP">N24 - VAZAMENTO DE GLP</option>
+        <option value="N28 - OCORRÊNCIA COM ANIMAL">N28 - OCORRÊNCIA COM ANIMAL</option>
+        <option value="N30 - ATIVIDADE EDUCATIVA DE BOMBEIRO">N30 - ATIVIDADE EDUCATIVA DE BOMBEIRO</option>
+        <option value="N99 - INCÊNDIO EM VEGETAÇÃO">N99 - INCÊNDIO EM VEGETAÇÃO</option>
+    </select>
+
+    <label for="municipio">F. Município:</label>
+    <select id="municipio" name="municipio" required>
+        <option value="">Selecione o Município</option>
+        <option value="Aguaí">Aguaí</option>
+        <option value="Águas da Prata">Águas da Prata</option>
+        <option value="Águas de Lindóia">Águas de Lindóia</option>
+        <option value="Águas de Santa Bárbara">Águas de Santa Bárbara</option>
+        <option value="Águas de São Pedro">Águas de São Pedro</option>
+        <option value="Alambari">Alambari</option>
+        <option value="Alumínio">Alumínio</option>
+        <option value="Americana">Americana</option>
+        <option value="Amparo">Amparo</option>
+        <option value="Analândia">Analândia</option>
+        <option value="Angatuba">Angatuba</option>
+        <option value="Anhembi">Anhembi</option>
+        <option value="Apiaí">Apiaí</option>
+        <option value="Araçariguama">Araçariguama</option>
+        <option value="Araçoiaba da Serra">Araçoiaba da Serra</option>
+        <option value="Arandu">Arandu</option>
+        <option value="Araras">Araras</option>
+        <option value="Areiópolis">Areiópolis</option>
+        <option value="Artur Nogueira">Artur Nogueira</option>
+        <option value="Atibaia">Atibaia</option>
+        <option value="Avaré">Avaré</option>
+        <option value="Barão de Antonina">Barão de Antonina</option>
+        <option value="Barra do Chapéu">Barra do Chapéu</option>
+        <option value="Bofete">Bofete</option>
+        <option value="Boituva">Boituva</option>
+        <option value="Bom Jesus dos Perdões">Bom Jesus dos Perdões</option>
+        <option value="Bom Sucesso de Itararé">Bom Sucesso de Itararé</option>
+        <option value="Botucatu">Botucatu</option>
+        <option value="Bragança Paulista">Bragança Paulista</option>
+        <option value="Brotas">Brotas</option>
+        <option value="Buri">Buri</option>
+        <option value="Cabreúva">Cabreúva</option>
+        <option value="Caconde">Caconde</option>
+        <option value="Campina do Monte Alegre">Campina do Monte Alegre</option>
+        <option value="Campinas">Campinas</option>
+        <option value="Campo Limpo Paulista">Campo Limpo Paulista</option>
+        <option value="Capão Bonito">Capão Bonito</option>
+        <option value="Capela do Alto">Capela do Alto</option>
+        <option value="Capivari">Capivari</option>
+        <option value="Casa Branca">Casa Branca</option>
+        <option value="Cerqueira César">Cerqueira César</option>
+        <option value="Cerquilho">Cerquilho</option>
+        <option value="Cesário Lange">Cesário Lange</option>
+        <option value="Charqueada">Charqueada</option>
+        <option value="Conchal">Conchal</option>
+        <option value="Conchas">Conchas</option>
+        <option value="Cordeirópolis">Cordeirópolis</option>
+        <option value="Coronel Macedo">Coronel Macedo</option>
+        <option value="Corumbataí">Corumbataí</option>
+        <option value="Cosmópolis">Cosmópolis</option>
+        <option value="Divinolândia">Divinolândia</option>
+        <option value="Elias Fausto">Elias Fausto</option>
+        <option value="Engenheiro Coelho">Engenheiro Coelho</option>
+        <option value="Espírito Santo do Pinhal">Espírito Santo do Pinhal</option>
+        <option value="Estiva Gerbi">Estiva Gerbi</option>
+        <option value="Fartura">Fartura</option>
+        <option value="Guapiara">Guapiara</option>
+        <option value="Guareí">Guareí</option>
+        <option value="Holambra">Holambra</option>
+        <option value="Hortolândia">Hortolândia</option>
+        <option value="Iaras">Iaras</option>
+        <option value="Ibiúna">Ibiúna</option>
+        <option value="Indaiatuba">Indaiatuba</option>
+        <option value="Iperó">Iperó</option>
+        <option value="Ipeúna">Ipeúna</option>
+        <option value="Iracemápolis">Iracemápolis</option>
+        <option value="Itaberá">Itaberá</option>
+        <option value="Itaí">Itaí</option>
+        <option value="Itaoca">Itaoca</option>
+        <option value="Itapetininga">Itapetininga</option>
+        <option value="Itapeva">Itapeva</option>
+        <option value="Itapira">Itapira</option>
+        <option value="Itapirapuã Paulista">Itapirapuã Paulista</option>
+        <option value="Itaporanga">Itaporanga</option>
+        <option value="Itararé">Itararé</option>
+        <option value="Itatiba">Itatiba</option>
+        <option value="Itatinga">Itatinga</option>
+        <option value="Itirapina">Itirapina</option>
+        <option value="Itobi">Itobi</option>
+        <option value="Itu">Itu</option>
+        <option value="Itupeva">Itupeva</option>
+        <option value="Jaguariúna">Jaguariúna</option>
+        <option value="Jarinu">Jarinu</option>
+        <option value="Joanópolis">Joanópolis</option>
+        <option value="Jumirim">Jumirim</option>
+        <option value="Jundiaí">Jundiaí</option>
+        <option value="Laranjal Paulista">Laranjal Paulista</option>
+        <option value="Leme">Leme</option>
+        <option value="Limeira">Limeira</option>
+        <option value="Lindóia">Lindóia</option>
+        <option value="Louveira">Louveira</option>
+        <option value="Mairinque">Mairinque</option>
+        <option value="Manduri">Manduri</option>
+        <option value="Mococa">Mococa</option>
+        <option value="Mogi Guaçu">Mogi Guaçu</option>
+        <option value="Mogi Mirim">Mogi Mirim</option>
+        <option value="Mombuca">Mombuca</option>
+        <option value="Monte Alegre do Sul">Monte Alegre do Sul</option>
+        <option value="Monte Mor">Monte Mor</option>
+        <option value="Morungaba">Morungaba</option>
+        <option value="Nazaré Paulista">Nazaré Paulista</option>
+        <option value="Nova Campina">Nova Campina</option>
+        <option value="Nova Odessa">Nova Odessa</option>
+        <option value="Paranapanema">Paranapanema</option>
+        <option value="Pardinho">Pardinho</option>
+        <option value="Paulínia">Paulínia</option>
+        <option value="Pedra Bela">Pedra Bela</option>
+        <option value="Pedreira">Pedreira</option>
+        <option value="Pereiras">Pereiras</option>
+        <option value="Piedade">Piedade</option>
+        <option value="Pilar do Sul">Pilar do Sul</option>
+        <option value="Pinhalzinho">Pinhalzinho</option>
+        <option value="Piracaia">Piracaia</option>
+        <option value="Piracicaba">Piracicaba</option>
+        <option value="Piraju">Piraju</option>
+        <option value="Pirassununga">Pirassununga</option>
+        <option value="Porangaba">Porangaba</option>
+        <option value="Porto Feliz">Porto Feliz</option>
+        <option value="Pratânia">Pratânia</option>
+        <option value="Quadra">Quadra</option>
+        <option value="Rafard">Rafard</option>
+        <option value="Ribeira">Ribeira</option>
+        <option value="Ribeirão Branco">Ribeirão Branco</option>
+        <option value="Ribeirão Grande">Ribeirão Grande</option>
+        <option value="Rio Claro">Rio Claro</option>
+        <option value="Rio das Pedras">Rio das Pedras</option>
+        <option value="Riversul">Riversul</option>
+        <option value="Saltinho">Saltinho</option>
+        <option value="Salto">Salto</option>
+        <option value="Salto de Pirapora">Salto de Pirapora</option>
+        <option value="Santa Bárbara d'Oeste">Santa Bárbara d'Oeste</option>
+        <option value="Santa Cruz da Conceição">Santa Cruz da Conceição</option>
+        <option value="Santa Cruz das Palmeiras">Santa Cruz das Palmeiras</option>
+        <option value="Santa Gertrudes">Santa Gertrudes</option>
+        <option value="Santa Maria da Serra">Santa Maria da Serra</option>
+        <option value="Santo Antônio de Posse">Santo Antônio de Posse</option>
+        <option value="Santo Antônio do Jardim">Santo Antônio do Jardim</option>
+        <option value="São João da Boa Vista">São João da Boa Vista</option>
+        <option value="São José do Rio Pardo">São José do Rio Pardo</option>
+        <option value="São Manuel">São Manuel</option>
+        <option value="São Miguel Arcanjo">São Miguel Arcanjo</option>
+        <option value="São Pedro">São Pedro</option>
+        <option value="São Roque">São Roque</option>
+        <option value="São Sebastião da Grama">São Sebastião da Grama</option>
+        <option value="Sarapuí">Sarapuí</option>
+        <option value="Sarutaiá">Sarutaiá</option>
+        <option value="Serra Negra">Serra Negra</option>
+        <option value="Socorro">Socorro</option>
+        <option value="Sorocaba">Sorocaba</option>
+        <option value="Sumaré">Sumaré</option>
+        <option value="Taguaí">Taguaí</option>
+        <option value="Tambaú">Tambaú</option>
+        <option value="Tapiraí">Tapiraí</option>
+        <option value="Tapiratiba">Tapiratiba</option>
+        <option value="Taquarituba">Taquarituba</option>
+        <option value="Taquarivaí">Taquarivaí</option>
+        <option value="Tatuí">Tatuí</option>
+        <option value="Tejupá">Tejupá</option>
+        <option value="Tietê">Tietê</option>
+        <option value="Torre de Pedra">Torre de Pedra</option>
+        <option value="Torrinha">Torrinha</option>
+        <option value="Tuiuti">Tuiuti</option>
+        <option value="Valinhos">Valinhos</option>
+        <option value="Vargem">Vargem</option>
+        <option value="Vargem Grande do Sul">Vargem Grande do Sul</option>
+        <option value="Várzea Paulista">Várzea Paulista</option>
+        <option value="Vinhedo">Vinhedo</option>
+        <option value="Votorantim">Votorantim</option>
+    </select>
+    
+    <label for="endereco">G. Endereço:</label>
+    <input type="text" id="endereco" name="endereco" required>
+    
+    <label for="bairro">H. Bairro:</label>
+    <input type="text" id="bairro" name="bairro">
+
+    <label for="qtdViaturas">I. Quantidade de Viaturas:</label>
+    <input type="number" id="qtdViaturas" name="qtdViaturas" min="1" required>
+
+    <label for="qtdBombeiros">J. Quantidade de Bombeiros:</label>
+    <input type="number" id="qtdBombeiros" name="qtdBombeiros" min="1" required>
+    
+    <hr>
+    <h3>K. Encarregado no Local da Ocorrência</h3>
+    <div class="field-group">
+        <label>Posto/Graduação e QRA:</label>
+        <select id="rankEncarregadoLocal" name="rankEncarregadoLocal" required>
+            <option value="">Selecione o Posto/Graduação</option>
+            <option value="SD PM">SD PM</option>
+            <option value="CB PM">CB PM</option>
+            <option value="3ºSGT PM">3ºSGT PM</option>
+            <option value="2ºSGT PM">2ºSGT PM</option>
+            <option value="1ºSGT PM">1ºSGT PM</option>
+            <option value="SUBTEN PM">SUBTEN PM</option>
+            <option value="2ºTEN PM">2ºTEN PM</option>
+            <option value="1ºTEN PM">1ºTEN PM</option>
+            <option value="CAP PM">CAP PM</option>
+            <option value="MAJ PM">MAJ PM</option>
+            <option value="TEN CEL PM">TEN CEL PM</option>
+            <option value="CEL PM">CEL PM</option>
+        </select>
+        <input type="text" id="nomeEncarregadoLocal" name="nomeEncarregadoLocal" placeholder="QRA/Nome" required>
+    </div>
+    
+    <label for="historicoInicial">L. Histórico Inicial (O que motivou o atendimento):</label>
+    <textarea id="historicoInicial" name="historicoInicial" rows="5" required></textarea>
+
+    <label for="historicoFinal">M. Histórico Final (Detalhamento das ações, óbitos, vítimas, etc.):</label>
+    <textarea id="historicoFinal" name="historicoFinal" rows="8" required></textarea>
+    
+    <hr>
+
+    <h3>N. Nome PM Transmissão</h3>
+    <div class="field-group">
+        <label>Posto/Graduação e QRA:</label>
+        <select id="rankPmTransmissao" name="rankPmTransmissao" required>
+            <option value="">Selecione o Posto/Graduação</option>
+            <option value="SD PM">SD PM</option>
+            <option value="CB PM">CB PM</option>
+            <option value="3ºSGT PM">3ºSGT PM</option>
+            <option value="2ºSGT PM">2ºSGT PM</option>
+            <option value="1ºSGT PM">1ºSGT PM</option>
+            <option value="SUBTEN PM">SUBTEN PM</option>
+            <option value="2ºTEN PM">2ºTEN PM</option>
+            <option value="1ºTEN PM">1ºTEN PM</option>
+            <option value="CAP PM">CAP PM</option>
+            <option value="MAJ PM">MAJ PM</option>
+            <option value="TEN CEL PM">TEN CEL PM</option>
+            <option value="CEL PM">CEL PM</option>
+        </select>
+        <input type="text" id="nomePmTransmissao" name="nomePmTransmissao" placeholder="QRA/Nome" required>
+    </div>
+
+    <label for="tempoVTR">O. Tempo Primeira VTR no Local: (Digite em minutos "5","10")</label>
+    <input type="number" id="tempoVTR" name="tempoVTR" min="1" required>
+
+    <hr>
+
+    <h3>P. Oficiais que Compareceram no Local</h3>
+    <div class="field-group">
+        <label>Posto/Graduação e QRA:</label>
+        <select id="rankOficiaisLocal" name="rankOficiaisLocal" required onchange="handleOficialLocalChange()">
+            <option value="">Selecione o Posto/Graduação</option>
+            <option value="NÃO HOUVE OFICIAL NO LOCAL">NÃO HOUVE OFICIAL NO LOCAL</option>
+            <option value="2ºTEN PM">2ºTEN PM</option>
+            <option value="1ºTEN PM">1ºTEN PM</option>
+            <option value="CAP PM">CAP PM</option>
+            <option value="MAJ PM">MAJ PM</option>
+            <option value="TEN CEL PM">TEN CEL PM</option>
+            <option value="CEL PM">CEL PM</option>
+        </select>
+        <input type="text" id="nomeOficiaisLocal" name="nomeOficiaisLocal" placeholder="QRA/Nome" required>
+    </div>
+
+    <button type="button" onclick="processarDados()">GERAR RELATÓRIO</button>
+  </form>
+
+  <hr>
+
+  <h3>Resultado e Cópia</h3>
+  <textarea id="saidaTexto" readonly placeholder="O relatório formatado aparecerá aqui após o processamento."></textarea>
+  <button type="button" onclick="copiarTexto()">Copiar Texto</button>
+  <div id="mensagemCopia" class="info">Aguardando geração do relatório.</div>
+
+</body>
+</html>

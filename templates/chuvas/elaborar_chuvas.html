@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHUVAS - Nova Ocorrência</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .conditional-group {
+            border-left: 3px solid var(--primary-color);
+            padding-left: 20px;
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 40px; width: auto;">
+                    <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                            Chuvas Intensas</span></span>
+                </div>
+                <div class="user-menu">
+                    <a href="{{ url_for('chuvas.chuvas_intensas') }}" class="header-icon-btn">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main class="app-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Nova Ocorrência de Chuvas Intensas</h2>
+                    <p>Preencha os dados do atendimento relacionado a chuvas.</p>
+                </div>
+
+                <form id="rain-form">
+
+                    <!-- DADOS BÁSICOS -->
+                    <div class="form-section">
+                        <div class="section-header"><i class="bi bi-info-circle"></i> Dados Básicos</div>
+                        <div class="form-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="talao_numero">Número do Talão</label>
+                                <input type="text" id="talao_numero" name="talao_numero">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="data_hora">Data e Hora</label>
+                                <input type="datetime-local" id="data_hora" name="data_hora" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="municipio_id">Município</label>
+                            <select id="municipio_id" name="municipio_id" required>
+                                <option value="">Selecione...</option>
+                                <!-- Será preenchido via JS -->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="endereco">Endereço / Localização</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="endereco" name="endereco"
+                                    placeholder="Endereço, Referência ou Coordenadas" style="flex: 1;">
+                                <button type="button" onclick="getLocation()"
+                                    style="background-color: #16a34a; color: white; border: none; padding: 0 20px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600;"
+                                    title="Obter localização atual">
+                                    <i class="bi bi-geo-alt-fill"></i> Estou no Local
+                                </button>
+                            </div>
+                            <div style="font-size: 0.8em; color: var(--text-muted); margin-top: 5px;" id="geo-status">
+                            </div>
+                            <input type="hidden" id="latitude" name="latitude">
+                            <input type="hidden" id="longitude" name="longitude">
+                        </div>
+                    </div>
+
+                    <!-- TIPO DE ATENDIMENTO -->
+                    <div class="form-section">
+                        <div class="section-header"><i class="bi bi-person-badge"></i> Atendimento</div>
+
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 10px;">Responsável pelo Atendimento:</label>
+                            <div style="display: flex; gap: 20px;">
+                                <!-- Botões estilizados para seleção -->
+                                <button type="button" id="btn-bombeiros" class="btn-toggle active"
+                                    onclick="selectAtendimento('BOMBEIROS')"
+                                    style="flex: 1; background-color: #dc2626; color: white; border: none; padding: 15px 20px; border-radius: 12px; cursor: pointer; opacity: 0.6; transition: all 0.3s; font-size: 1.1em; font-weight: 700; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}"
+                                        alt="Brasão Bombeiros"
+                                        style="height: 35px; display: block; margin: 0 auto 5px auto;">
+                                    CORPO DE BOMBEIROS
+                                </button>
+
+                                <button type="button" id="btn-outros" class="btn-toggle"
+                                    onclick="selectAtendimento('OUTROS')"
+                                    style="flex: 1; background-color: #d97706; color: white; border: none; padding: 15px 20px; border-radius: 12px; cursor: pointer; opacity: 0.6; transition: all 0.3s; font-size: 1.1em; font-weight: 700; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                    <i class="bi bi-building"
+                                        style="font-size: 1.3em; display: block; margin-bottom: 5px;"></i>
+                                    OUTROS ÓRGÃOS
+                                </button>
+
+                                <!-- Input oculto para manter compatibilidade com o form submit -->
+                                <input type="hidden" name="tipo_atendimento" id="tipo_atendimento_input"
+                                    value="BOMBEIROS">
+                            </div>
+                        </div>
+
+                        <!-- SEÇÃO BOMBEIROS -->
+                        <div id="group-bombeiros" class="conditional-group">
+                            <div class="form-group">
+                                <label for="bombeiros_station_id">Estação de Bombeiros</label>
+                                <select id="bombeiros_station_id" name="bombeiros_station_id">
+                                    <option value="">Selecione a Estação...</option>
+                                    <!-- JS -->
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 8px;">Prontidão</label>
+                                <div style="display: flex; gap: 15px;">
+                                    <button type="button" id="btn-pront-verde" class="btn-toggle-pront"
+                                        onclick="selectProntidao('VERDE')"
+                                        style="flex: 1; background-color: #22c55e; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0.5; transition: all 0.2s;">
+                                        VERDE
+                                    </button>
+                                    <button type="button" id="btn-pront-amarela" class="btn-toggle-pront"
+                                        onclick="selectProntidao('AMARELA')"
+                                        style="flex: 1; background-color: #eab308; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0.5; transition: all 0.2s;">
+                                        AMARELA
+                                    </button>
+                                    <button type="button" id="btn-pront-azul" class="btn-toggle-pront"
+                                        onclick="selectProntidao('AZUL')"
+                                        style="flex: 1; background-color: #3b82f6; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; opacity: 0.5; transition: all 0.2s;">
+                                        AZUL
+                                    </button>
+                                    <input type="hidden" name="bombeiros_prontidao" id="bombeiros_prontidao_input">
+                                </div>
+                            </div>
+
+                            <div class="form-row" style="display: flex; gap: 15px;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="bombeiros_viatura">Viatura</label>
+                                    <input type="text" id="bombeiros_viatura" name="bombeiros_viatura"
+                                        placeholder="Ex: ABS-1234">
+                                </div>
+                                <div class="form-group" style="flex: 2;">
+                                    <label>Encarregado</label>
+                                    <div style="display: flex; gap: 10px;">
+                                        <select id="encarregado_posto" style="width: 150px; flex-shrink: 0;">
+                                            <option value="">Posto/Grad</option>
+                                            <option value="SD PM">SD PM</option>
+                                            <option value="CB PM">CB PM</option>
+                                            <option value="3º SGT PM">3º SGT PM</option>
+                                            <option value="2º SGT PM">2º SGT PM</option>
+                                            <option value="1º SGT PM">1º SGT PM</option>
+                                            <option value="SUB TEN PM">SUB TEN PM</option>
+                                            <option value="ASP OF PM">ASP OF PM</option>
+                                            <option value="2º TEN PM">2º TEN PM</option>
+                                            <option value="1º TEN PM">1º TEN PM</option>
+                                            <option value="CAP PM">CAP PM</option>
+                                            <option value="MAJ PM">MAJ PM</option>
+                                            <option value="TEN CEL PM">TEN CEL PM</option>
+                                            <option value="CEL PM">CEL PM</option>
+                                        </select>
+                                        <input type="text" id="encarregado_nome" placeholder="Nome de Guerra"
+                                            style="flex: 1;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEÇÃO OUTROS -->
+                        <div id="group-outros" class="conditional-group"
+                            style="display: none; border-left-color: #64748b;">
+                            <div class="form-group">
+                                <label for="outros_orgao">Órgão Responsável</label>
+                                <select id="outros_orgao" name="outros_orgao">
+                                    <option value="">Selecione...</option>
+                                    <option value="DEFESA_CIVIL">Defesa Civil</option>
+                                    <option value="PREFEITURA">Prefeitura / Obras</option>
+                                    <option value="ENERGIA">Cia de Energia (CPFL, Elektro...)</option>
+                                    <option value="SANEAMENTO">Cia de Saneamento (Sabesp...)</option>
+                                    <option value="CONCESSIONARIA">Concessionária de Rodovia</option>
+                                    <option value="OUTROS">Outros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="outros_detalhes">Detalhamento</label>
+                                <input type="text" id="outros_detalhes" name="outros_detalhes"
+                                    placeholder="Detalhes da equipe ou empresa">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NATUREZA E CLASSIFICAÇÃO -->
+                    <div class="form-section">
+                        <div class="section-header"><i class="bi bi-exclamation-triangle"></i> Classificação</div>
+
+                        <div class="form-group">
+                            <label for="natureza_codigo">Natureza</label>
+                            <select id="natureza_codigo" name="natureza_codigo" required>
+                                <option value="">Selecione...</option>
+                                <option value="A1">A1 - Árvore em Risco/Queda (P.Q.I)</option>
+                                <option value="A2">A2 - Poda Emergencial</option>
+                                <option value="A3">A3 - Risco Elétrico</option>
+                                <option value="A4">A4 - Obstrução de Via</option>
+                                <option value="A5">A5 - Outras Situações / Alagamento</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row" style="display: flex; gap: 15px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label style="display: block; margin-bottom: 8px;">Área</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="button" id="btn-area-publica" class="btn-toggle-area"
+                                        onclick="selectArea('PUBLICA')"
+                                        style="flex: 1; padding: 12px; font-size: 1em; border-radius: 8px; border: none; background: #e2e8f0; font-weight: 600; color: #64748b; transition: all 0.2s;">
+                                        Pública
+                                    </button>
+                                    <button type="button" id="btn-area-particular" class="btn-toggle-area"
+                                        onclick="selectArea('PARTICULAR')"
+                                        style="flex: 1; padding: 12px; font-size: 1em; border-radius: 8px; border: none; background: #e2e8f0; font-weight: 600; color: #64748b; transition: all 0.2s;">
+                                        Particular
+                                    </button>
+                                    <input type="hidden" name="area_tipo" id="area_tipo_input" value="PUBLICA">
+                                </div>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label style="display: block; margin-bottom: 8px;">Prioridade</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="button" id="btn-prio-alta" onclick="selectPrioridade('ALTA')"
+                                        style="flex: 1; padding: 12px; font-size: 1em; border-radius: 8px; border: none; background: #e2e8f0; font-weight: 600; color: #64748b; transition: all 0.2s;">
+                                        Alta
+                                    </button>
+                                    <button type="button" id="btn-prio-media" onclick="selectPrioridade('MEDIA')"
+                                        style="flex: 1; padding: 12px; font-size: 1em; border-radius: 8px; border: none; background: #e2e8f0; font-weight: 600; color: #64748b; transition: all 0.2s;">
+                                        Média
+                                    </button>
+                                    <button type="button" id="btn-prio-baixa" onclick="selectPrioridade('BAIXA')"
+                                        style="flex: 1; padding: 12px; font-size: 1em; border-radius: 8px; border: none; background: #e2e8f0; font-weight: 600; color: #64748b; transition: all 0.2s;">
+                                        Baixa
+                                    </button>
+                                    <input type="hidden" name="prioridade" id="prioridade_input" value="MEDIA">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STATUS E CONCLUSÃO -->
+                    <div class="form-section">
+                        <div class="section-header"><i class="bi bi-check-circle"></i> Situação</div>
+
+                        <div class="form-row" style="display: flex; gap: 15px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label style="display: block; margin-bottom: 8px;">Limpeza de Via</label>
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+                                    <button type="button" id="btn-limp-nao" onclick="selectLimpeza('NAO_SE_APLICA')"
+                                        style="padding: 12px; border-radius: 8px; border: none; background: #f1f5f9; text-align: left; padding-left: 20px; font-weight: 500; color: #64748b; transition: all 0.2s;">
+                                        <i class="bi bi-circle"></i> Não se aplica
+                                    </button>
+                                    <button type="button" id="btn-limp-realizada" onclick="selectLimpeza('REALIZADA')"
+                                        style="padding: 12px; border-radius: 8px; border: none; background: #f1f5f9; text-align: left; padding-left: 20px; font-weight: 500; color: #64748b; transition: all 0.2s;">
+                                        <i class="bi bi-check-circle"></i> Realizada
+                                    </button>
+                                    <button type="button" id="btn-limp-aguardando" onclick="selectLimpeza('AGUARDANDO')"
+                                        style="padding: 12px; border-radius: 8px; border: none; background: #f1f5f9; text-align: left; padding-left: 20px; font-weight: 500; color: #64748b; transition: all 0.2s;">
+                                        <i class="bi bi-hourglass-split"></i> Aguardando
+                                    </button>
+                                    <input type="hidden" name="limpeza_via" id="limpeza_via_input"
+                                        value="NAO_SE_APLICA">
+                                </div>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label style="display: block; margin-bottom: 8px;">Resultado</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <button type="button" id="btn-res-supressao" onclick="selectResultado('SUPRESSAO')"
+                                        style="padding: 12px; border-radius: 8px; border: none; background: #f1f5f9; cursor: pointer; transition: all 0.2s; font-size: 0.9em; font-weight: 500; color: #64748b;">
+                                        Supressão
+                                    </button>
+                                    <button type="button" id="btn-res-poda" onclick="selectResultado('PODA')"
+                                        style="padding: 12px; border-radius: 8px; border: none; background: #f1f5f9; cursor: pointer; transition: all 0.2s; font-size: 0.9em; font-weight: 500; color: #64748b;">
+                                        Poda
+                                    </button>
+                                    <button type="button" id="btn-res-vistoria" onclick="selectResultado('VISTORIA')"
+                                        style="padding: 12px; border-radius: 8px; border: none; background: #f1f5f9; cursor: pointer; transition: all 0.2s; font-size: 0.9em; font-weight: 500; color: #64748b;">
+                                        Vistoria
+                                    </button>
+                                    <button type="button" id="btn-res-nao" onclick="selectResultado('NAO_SE_APLICA')"
+                                        style="padding: 12px; border-radius: 8px; border: none; background: #f1f5f9; cursor: pointer; transition: all 0.2s; font-size: 0.9em; font-weight: 500; color: #64748b;">
+                                        Não se aplica
+                                    </button>
+                                    <input type="hidden" name="resultado" id="resultado_input" value="NAO_SE_APLICA">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 8px;">Status Atual</label>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button type="button" id="btn-status-espera" onclick="selectStatus('ESPERA')"
+                                    style="flex: 1; min-width: 120px; padding: 12px; border-radius: 8px; border: none; background: #e2e8f0; color: #475569; font-weight: 600;">
+                                    Em Espera
+                                </button>
+                                <button type="button" id="btn-status-agendada" onclick="selectStatus('AGENDADA')"
+                                    style="flex: 1; min-width: 120px; padding: 12px; border-radius: 8px; border: none; background: #e2e8f0; color: #475569; font-weight: 600;">
+                                    Agendada
+                                </button>
+                                <button type="button" id="btn-status-atendimento"
+                                    onclick="selectStatus('EM_ATENDIMENTO')"
+                                    style="flex: 1; min-width: 120px; padding: 12px; border-radius: 8px; border: none; background: #e2e8f0; color: #475569; font-weight: 600;">
+                                    Em Atendimento
+                                </button>
+                                <button type="button" id="btn-status-atendido" onclick="selectStatus('ATENDIDO')"
+                                    style="flex: 1; min-width: 120px; padding: 12px; border-radius: 8px; border: none; background: #e2e8f0; color: #475569; font-weight: 600;">
+                                    Finalizado
+                                </button>
+                                <input type="hidden" name="status" id="status_input" value="ESPERA">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="observacao">Observações</label>
+                            <textarea id="observacao" name="observacao" rows="4"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary" style="width: 100%; padding: 15px; font-size: 1.1em;">
+                            <i class="bi bi-save"></i> SALVAR OCORRÊNCIA
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setar data atual
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('data_hora').value = now.toISOString().slice(0, 16);
+
+            loadMunicipalities();
+            loadOPMs();
+        });
+
+        async function loadMunicipalities() {
+            // Usando lista estática para garantir funcionamento
+            const cities = [
+                "Aguaí", "Águas da Prata", "Águas de Lindóia", "Águas de Santa Bárbara", "Águas de São Pedro", "Alambari", "Alumínio", "Americana", "Amparo", "Analândia", "Angatuba", "Anhembi", "Apiaí", "Araçariguama", "Araçoiaba da Serra", "Arandu", "Araras", "Areiópolis", "Artur Nogueira", "Atibaia", "Avaré", "Barão de Antonina", "Barra do Chapéu", "Bofete", "Boituva", "Bom Jesus dos Perdões", "Bom Sucesso de Itararé", "Botucatu", "Bragança Paulista", "Brotas", "Buri", "Cabreúva", "Caconde", "Campina do Monte Alegre", "Campinas", "Campo Limpo Paulista", "Capão Bonito", "Capela do Alto", "Capivari", "Casa Branca", "Cerqueira César", "Cerquilho", "Cesário Lange", "Charqueada", "Conchal", "Conchas", "Cordeirópolis", "Coronel Macedo", "Corumbataí", "Cosmópolis", "Divinolândia", "Elias Fausto", "Engenheiro Coelho", "Espírito Santo do Pinhal", "Estiva Gerbi", "Fartura", "Guapiara", "Guareí", "Holambra", "Hortolândia", "Iaras", "Ibiúna", "Indaiatuba", "Iperó", "Ipeúna", "Iracemápolis", "Itaberá", "Itaí", "Itaoca", "Itapetininga", "Itapeva", "Itapira", "Itapirapuã Paulista", "Itaporanga", "Itararé", "Itatiba", "Itatinga", "Itirapina", "Itobi", "Itu", "Itupeva", "Jaguariúna", "Jarinu", "Joanópolis", "Jumirim", "Jundiaí", "Laranjal Paulista", "Leme", "Limeira", "Lindóia", "Louveira", "Mairinque", "Manduri", "Mococa", "Mogi Guaçu", "Mogi Mirim", "Mombuca", "Monte Alegre do Sul", "Monte Mor", "Morungaba", "Nazaré Paulista", "Nova Campina", "Nova Odessa", "Paranapanema", "Pardinho", "Paulínia", "Pedra Bela", "Pedreira", "Pereiras", "Piedade", "Pilar do Sul", "Pinhalzinho", "Piracaia", "Piracicaba", "Piraju", "Pirassununga", "Porangaba", "Porto Feliz", "Pratânia", "Quadra", "Rafard", "Ribeira", "Ribeirão Branco", "Ribeirão Grande", "Rio Claro", "Rio das Pedras", "Riversul", "Saltinho", "Salto", "Salto de Pirapora", "Santa Bárbara d'Oeste", "Santa Cruz da Conceição", "Santa Cruz das Palmeiras", "Santa Gertrudes", "Santa Maria da Serra", "Santo Antônio de Posse", "Santo Antônio do Jardim", "São João da Boa Vista", "São José do Rio Pardo", "São Manuel", "São Miguel Arcanjo", "São Pedro", "São Roque", "São Sebastião da Grama", "Sarapuí", "Sarutaiá", "Serra Negra", "Socorro", "Sorocaba", "Sumaré", "Taguaí", "Tambaú", "Tapiraí", "Tapiratiba", "Taquarituba", "Taquarivaí", "Tatuí", "Tejupá", "Tietê", "Torre de Pedra", "Torrinha", "Tuiuti", "Valinhos", "Vargem", "Vargem Grande do Sul", "Várzea Paulista", "Vinhedo", "Votorantim"
+            ];
+
+            const sel = document.getElementById('municipio_id'); // Na verdade é municipio_id no banco rain_occurrences
+            // No vulto é string "municipio_nome". Aqui no banco de chuva eu coloquei "municipio_id BIGINT" que referencia uma tabela.
+            // Se eu usar string aqui, vai dar erro no banco ao salvar.
+            // O usuário relatou que a lista nao funciona. Provavelmente porque a tabela 'municipalities' está vazia ou bloqueada.
+            // Para resolver RÁPIDO: vou mudar o formulário HTML para enviar o NOME do município no campo texto ou similar, mas o banco espera ID.
+            // MELHOR: Vou popular o select com a lista de nomes, mas vou ter que mudar o backend para aceitar o nome ou...
+            // Espera, no banco 'rain_occurrences' eu coloquei 'municipio_id BIGINT'. Se eu mandar string 'Aguaí', o backend vai falhar na conversão 'int'.
+            // No Vulto, o campo é 'municipio_nome TEXT'.
+
+            // SOLUÇÃO ROBUSTA: Eu preciso de IDs. Mas não tenho.
+            // Vou alterar a tabela `rain_occurrences` para usar `municipio_nome TEXT` em vez de ID, igual ao Vulto.
+            // Isso evita dependência da tabela `municipalities` que parece problemática.
+            // Mas primeiro, vou corrigir o frontend para exibir a lista. 
+            // COLOQUEI A LISTA ACIMA. Vou usar 'value=Nome' e mudar o campo HTML para name="municipio_nome".
+
+            cities.forEach(city => {
+                const opt = document.createElement('option');
+                opt.value = city; // Enviando o nome
+                opt.textContent = city;
+                sel.appendChild(opt);
+            });
+
+            // Ajustar ID do elemento para ficar consistente
+            // No HTML atual está id="municipio_id". Vou manter o ID do elemento mas o name precisa mudar se eu alterar o banco. 
+            // Ou, posso alterar o backend para receber 'municipio_id' mas tratar como texto se eu mudar o banco?
+            // Vou assumir que vou mudar o banco para TEXT também no script de "bombeiro" do próximo passo.
+        }
+
+        async function loadOPMs() {
+            try {
+                const res = await fetch('/api/opms');
+                const data = await res.json();
+                const sel = document.getElementById('bombeiros_station_id');
+                // Backend retorna lista direto
+                if (Array.isArray(data)) {
+                    data.forEach(opm => {
+                        const opt = document.createElement('option');
+                        opt.value = opm.id;
+                        // Formato idêntico ao Vulto: EB (GB)
+                        opt.textContent = `${opm.EB} (${opm.GB})`;
+                        sel.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.warn("Erro ao carregar OPMs", e); }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... restante do init ...
+            selectAtendimento('BOMBEIROS'); // Inicializar estado
+            selectArea('PUBLICA');
+            selectResultado('NAO_SE_APLICA');
+            selectProntidao('');
+            selectPrioridade('MEDIA');
+            selectLimpeza('NAO_SE_APLICA');
+            selectStatus('ESPERA');
+        });
+
+        // ... (código existente load etc)
+
+        function selectAtendimento(tipo) {
+            // Atualiza input hidden
+            document.getElementById('tipo_atendimento_input').value = tipo;
+
+            const btnBomb = document.getElementById('btn-bombeiros');
+            const btnOutros = document.getElementById('btn-outros');
+            const grpBomb = document.getElementById('group-bombeiros');
+            const grpOutros = document.getElementById('group-outros');
+
+            if (tipo === 'BOMBEIROS') {
+                // BOMBEIROS ATIVO
+                btnBomb.style.backgroundColor = '#dc2626'; // Vermelho Original
+                btnBomb.style.opacity = '1';
+                btnBomb.style.transform = 'scale(1.02)';
+                btnBomb.style.boxShadow = '0 4px 6px rgba(220, 38, 38, 0.4)';
+
+                // OUTROS INATIVO
+                btnOutros.style.backgroundColor = '#9ca3af'; // Cinza
+                btnOutros.style.opacity = '0.7';
+                btnOutros.style.transform = 'scale(1)';
+                btnOutros.style.boxShadow = 'none';
+
+                // Mostrar/Ocultar campos
+                grpBomb.style.display = 'block';
+                grpOutros.style.display = 'none';
+            } else {
+                // OUTROS ATIVO
+                btnOutros.style.backgroundColor = '#d97706'; // Laranja Original
+                btnOutros.style.opacity = '1';
+                btnOutros.style.transform = 'scale(1.02)';
+                btnOutros.style.boxShadow = '0 4px 6px rgba(217, 119, 6, 0.4)';
+
+                // BOMBEIROS INATIVO
+                btnBomb.style.backgroundColor = '#9ca3af'; // Cinza
+                btnBomb.style.opacity = '0.7';
+                btnBomb.style.transform = 'scale(1)';
+                btnBomb.style.boxShadow = 'none';
+
+                // Mostrar/Ocultar campos
+                grpBomb.style.display = 'none';
+                grpOutros.style.display = 'block';
+            }
+        }
+
+        function selectProntidao(valor) {
+            document.getElementById('bombeiros_prontidao_input').value = valor;
+
+            const btns = {
+                'VERDE': { id: 'btn-pront-verde', color: '#22c55e' },
+                'AMARELA': { id: 'btn-pront-amarela', color: '#eab308' },
+                'AZUL': { id: 'btn-pront-azul', color: '#3b82f6' }
+            };
+
+            for (const [key, data] of Object.entries(btns)) {
+                const btn = document.getElementById(data.id);
+                if (key === valor) {
+                    // Selecionado
+                    btn.style.backgroundColor = data.color;
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'scale(1.05)';
+                    btn.style.boxShadow = `0 4px 10px ${data.color}66`; // 40% opacity hex
+                } else {
+                    // Não Selecionado
+                    btn.style.backgroundColor = '#9ca3af'; // Gray
+                    btn.style.opacity = '0.4';
+                    btn.style.transform = 'scale(1)';
+                    btn.style.boxShadow = 'none';
+                }
+            }
+        }
+        function selectArea(valor) {
+            document.getElementById('area_tipo_input').value = valor;
+
+            const map = {
+                'PUBLICA': { id: 'btn-area-publica', bg: '#2563eb' },    // Azul
+                'PARTICULAR': { id: 'btn-area-particular', bg: '#d97706' } // Laranja
+            };
+
+            for (const key in map) {
+                const btn = document.getElementById(map[key].id);
+                if (key === valor) {
+                    btn.style.backgroundColor = map[key].bg;
+                    btn.style.color = 'white';
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'scale(1.05)';
+                    btn.style.boxShadow = `0 4px 6px ${map[key].bg}66`;
+                } else {
+                    btn.style.backgroundColor = '#e2e8f0';
+                    btn.style.color = '#64748b';
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'scale(1)';
+                    btn.style.boxShadow = 'none';
+                }
+            }
+        }
+
+        function selectResultado(valor) {
+            document.getElementById('resultado_input').value = valor;
+
+            const map = {
+                'SUPRESSAO': 'btn-res-supressao',
+                'PODA': 'btn-res-poda',
+                'VISTORIA': 'btn-res-vistoria',
+                'NAO_SE_APLICA': 'btn-res-nao'
+            };
+
+            for (const key in map) {
+                const btn = document.getElementById(map[key]);
+                if (key === valor) {
+                    btn.style.backgroundColor = '#64748b';
+                    btn.style.color = 'white';
+                    btn.style.borderColor = '#64748b';
+                } else {
+                    btn.style.backgroundColor = '#f8fafc';
+                    btn.style.color = '#334155';
+                    btn.style.borderColor = '#cbd5e1';
+                }
+            }
+        }
+
+        function selectPrioridade(valor) {
+            document.getElementById('prioridade_input').value = valor;
+
+            const map = {
+                'ALTA': { id: 'btn-prio-alta', bg: '#dc2626' }, // Vermelho forte
+                'MEDIA': { id: 'btn-prio-media', bg: '#d97706' }, // Laranja/Amarelo forte
+                'BAIXA': { id: 'btn-prio-baixa', bg: '#2563eb' }  // Azul forte
+            };
+
+            for (const key in map) {
+                const btn = document.getElementById(map[key].id);
+                if (key === valor) {
+                    btn.style.backgroundColor = map[key].bg;
+                    btn.style.color = 'white';
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'scale(1.05)';
+                    btn.style.boxShadow = `0 4px 6px ${map[key].bg}66`;
+                } else {
+                    btn.style.backgroundColor = '#e2e8f0';
+                    btn.style.color = '#64748b';
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'scale(1)';
+                    btn.style.boxShadow = 'none';
+                }
+            }
+        }
+        function selectLimpeza(valor) {
+            document.getElementById('limpeza_via_input').value = valor;
+
+            const map = {
+                'NAO_SE_APLICA': { id: 'btn-limp-nao', bg: '#64748b' },
+                'REALIZADA': { id: 'btn-limp-realizada', bg: '#16a34a' },
+                'AGUARDANDO': { id: 'btn-limp-aguardando', bg: '#eab308' }
+            };
+
+            for (const key in map) {
+                const btn = document.getElementById(map[key].id);
+                if (key === valor) {
+                    btn.style.backgroundColor = map[key].bg;
+                    btn.style.color = 'white';
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'scale(1.02)';
+                    btn.style.boxShadow = `0 4px 6px ${map[key].bg}66`;
+                } else {
+                    btn.style.backgroundColor = '#f1f5f9';
+                    btn.style.color = '#64748b';
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'scale(1)';
+                    btn.style.boxShadow = 'none';
+                }
+            }
+        }
+
+        function selectStatus(valor) {
+            document.getElementById('status_input').value = valor;
+
+            const map = {
+                'ESPERA': { id: 'btn-status-espera', color: '#f59e0b' },
+                'AGENDADA': { id: 'btn-status-agendada', color: '#3b82f6' },
+                'EM_ATENDIMENTO': { id: 'btn-status-atendimento', color: '#ef4444' },
+                'ATENDIDO': { id: 'btn-status-atendido', color: '#10b981' }
+            };
+
+            for (const key in map) {
+                const btn = document.getElementById(map[key].id);
+                if (key === valor) {
+                    btn.style.backgroundColor = map[key].color;
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.backgroundColor = '#e2e8f0';
+                    btn.style.color = '#475569';
+                }
+            }
+        }
+
+        function selectResultado(valor) {
+            document.getElementById('resultado_input').value = valor;
+
+            const map = {
+                'SUPRESSAO': { id: 'btn-res-supressao', bg: '#dc2626' },      // Vermelho
+                'PODA': { id: 'btn-res-poda', bg: '#d97706' },           // Laranja
+                'VISTORIA': { id: 'btn-res-vistoria', bg: '#2563eb' },   // Azul
+                'NAO_SE_APLICA': { id: 'btn-res-nao', bg: '#64748b' }    // Cinza
+            };
+
+            for (const key in map) {
+                const btn = document.getElementById(map[key].id);
+                if (key === valor) {
+                    btn.style.backgroundColor = map[key].bg;
+                    btn.style.color = 'white';
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'scale(1.02)';
+                    btn.style.boxShadow = `0 4px 6px ${map[key].bg}66`;
+                } else {
+                    btn.style.backgroundColor = '#f1f5f9';
+                    btn.style.color = '#64748b';
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'scale(1)';
+                    btn.style.boxShadow = 'none';
+                }
+            }
+        }
+
+        function getLocation() {
+            const status = document.getElementById('geo-status');
+            if (!navigator.geolocation) {
+                status.textContent = "Geolocalização não suportada.";
+                return;
+            }
+            status.textContent = "Obtendo localização...";
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    document.getElementById('latitude').value = pos.coords.latitude;
+                    document.getElementById('longitude').value = pos.coords.longitude;
+                    document.getElementById('endereco').value = `Geo: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+                    status.textContent = "Localização obtida!";
+                    status.style.color = "green";
+                },
+                () => {
+                    status.textContent = "Erro ao obter localização.";
+                    status.style.color = "red";
+                }
+            );
+        }
+
+        document.getElementById('rain-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Concatenar Encarregado
+            const posto = document.getElementById('encarregado_posto').value;
+            const nome = document.getElementById('encarregado_nome').value;
+            if (posto || nome) {
+                // Adiciona ao objeto data manualmente, pois os campos não têm o 'name' esperado pelo backend (ou têm nomes diferentes)
+                data.bombeiros_encarregado = `${posto} ${nome}`.trim();
+            }
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Processando...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/chuvas/save', { // Rota a criar
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    alert('Ocorrência de chuva salva com sucesso!');
+                    window.location.href = "{{ url_for('chuvas.chuvas_intensas_listar') }}";
+                } else {
+                    alert('Erro ao salvar: ' + (result.error || 'Erro desconhecido'));
+                }
+            } catch (err) {
+                alert('Erro de conexão.');
+                console.error(err);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

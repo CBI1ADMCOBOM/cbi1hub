@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAIA - Administração</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-admin {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-auditor {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-elaborator {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">BOMBEIROS CBI-1 | Admin</div>
+                <div class="user-menu">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn-secondary btn-sm">Voltar ao Menu</a>
+                    <a href="{{ url_for('auth.logout') }}" class="btn-logout"><i class="bi bi-box-arrow-right"></i>
+                        Sair</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="app-content" style="max-width: 1000px;">
+            <div class="card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>Gerenciamento de Usuários</h2>
+                    <div class="search-box">
+                        <input type="text" id="search" placeholder="Buscar por nome ou RE..." style="padding: 0.5rem;">
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Nome / Guerra</th>
+                                <th>R.E. / Posto</th>
+                                <th>Contato / Email</th>
+                                <th>OPM</th>
+                                <th>Role</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Editar Usuário -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <h3>Editar Usuário</h3>
+            <form id="edit-form">
+                <input type="hidden" id="edit-id" name="id">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="edit-name" name="full_name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nome de Guerra</label>
+                        <input type="text" id="edit-war-name" name="war_name">
+                    </div>
+                    <div class="form-group">
+                        <label>Posto</label>
+                        <select id="edit-rank" name="rank">
+                            <option value="SD">SD</option>
+                            <option value="CB">CB</option>
+                            <option value="3ºSGT">3ºSGT</option>
+                            <option value="2ºSGT">2ºSGT</option>
+                            <option value="1ºSGT">1ºSGT</option>
+                            <option value="SUB TEN">SUB TEN</option>
+                            <option value="2ºTEN">2ºTEN</option>
+                            <option value="1ºTEN">1ºTEN</option>
+                            <option value="CAP">CAP</option>
+                            <option value="MAJ">MAJ</option>
+                            <option value="TEN CEL">TEN CEL</option>
+                            <option value="CEL">CEL</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Role (Permissão)</label>
+                    <select id="edit-role" name="role">
+                        <option value="ELABORATOR">Elaborador</option>
+                        <option value="AUDITOR">Auditor</option>
+                        <option value="ADMIN">Administrador</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nova Senha (Opcional)</label>
+                    <input type="password" id="edit-password" name="password" placeholder="Deixe em branco para manter">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let usersData = [];
+
+        async function loadUsers() {
+            const res = await fetch('/api/admin/users');
+            usersData = await res.json();
+            renderUsers(usersData);
+        }
+
+        function renderUsers(users) {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div style="font-weight: 500;">${user.full_name || '-'}</div>
+                        <div style="font-size: 0.85rem; color: #666;">${user.war_name || '-'}</div>
+                    </td>
+                    <td>
+                        <div>${user.corporation_id || '-'}</div>
+                        <div style="font-size: 0.85rem; color: #666;">${user.rank || '-'}</div>
+                    </td>
+                    <td>
+                        <div>${user.contact || '-'}</div>
+                        <div style="font-size: 0.85rem; color: #666;">${user.email || '-'}</div>
+                    </td>
+                    <td>${user.opm?.name || '-'}</td>
+                    <td><span class="badge badge-${user.role.toLowerCase()}">${user.role}</span></td>
+                    <td class="actions-cell">
+                        <button class="btn-secondary btn-sm" onclick="editUser('${user.id}')"><i class="bi bi-pencil"></i></button>
+                        <button class="btn-danger btn-sm" onclick="deleteUser('${user.id}')"><i class="bi bi-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function editUser(id) {
+            const user = usersData.find(u => u.id === id);
+            if (!user) return;
+
+            document.getElementById('edit-id').value = user.id;
+            document.getElementById('edit-name').value = user.full_name;
+            document.getElementById('edit-war-name').value = user.war_name;
+            document.getElementById('edit-rank').value = user.rank;
+            document.getElementById('edit-role').value = user.role;
+            document.getElementById('edit-password').value = '';
+
+            document.getElementById('edit-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('edit-modal').classList.remove('active');
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Tem certeza que deseja remover este usuário?')) return;
+
+            try {
+                const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    loadUsers();
+                } else {
+                    alert('Erro ao remover: ' + data.error);
+                }
+            } catch (e) {
+                alert('Erro de conexão');
+            }
+        }
+
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const res = await fetch(`/api/admin/users/${data.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    closeModal();
+                    loadUsers();
+                } else {
+                    alert('Erro ao salvar: ' + result.error);
+                }
+            } catch (e) {
+                alert('Erro de conexão');
+            }
+        });
+
+        document.getElementById('search').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = usersData.filter(u =>
+                (u.full_name && u.full_name.toLowerCase().includes(term)) ||
+                (u.corporation_id && u.corporation_id.includes(term))
+            );
+            renderUsers(filtered);
+        });
+
+        loadUsers();
+    </script>
+</body>
+
+</html>
