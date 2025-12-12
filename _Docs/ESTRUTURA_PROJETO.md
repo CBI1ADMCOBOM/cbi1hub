@@ -89,11 +89,12 @@ O **RAIA (Registro de Atendimento Integrado e Análise)** é um sistema web dese
 
 ### 5.2. Módulo RAIA
 - **Elaboração**: Formulário com geolocalização e fotos (MinIO).
-- **Listagem**: Histórico pessoal.
+- **Listagem**: Histórico pessoal com visualização em cards.
+- **Gestão**: Visualização detalhada, Edição completa e Exclusão via modal.
 
 ### 5.3. Módulo Chuvas Intensas
 - **Gestão**: Registro específico para eventos climáticos.
-- **Fluxo**: Elaboração -> Listagem (Visualização e Edição em Sidebar).
+- **Fluxo**: Elaboração -> Listagem (Visualização e Edição em Sidebar/Modal).
 - **Visualização**: Filtros por GB (7º, 15º, 16º, 19º) ou Minhas Ocorrências.
 - **Edição**:
     - *Modo GB*: Apenas alteração de Status e Resultado.
@@ -102,14 +103,22 @@ O **RAIA (Registro de Atendimento Integrado e Análise)** é um sistema web dese
 ### 5.4. Módulo Vulto
 - **Geração Automática**: Criação de texto padrão para divulgação em grupos (WhatsApp).
 - **Registro**: Armazenamento detalhado de recursos, tempos e oficiais presentes.
+- **Visualização**: Histórico pessoal com opção de exclusão.
+- **Documentação**: Acesso rápido a Notas de Instrução e Ordens Complementares via menu.
 
 ### 5.5. Módulo Inconsistências
 - **Reporte**: Usuários podem reportar falhas técnicas (T4) ou operacionais.
 - **Gestão**: Admins visualizam todos os reportes.
+- **Suporte**: Botão de acesso ao "Manual de Instrução".
 
 ### 5.6. Painel Administrativo
 - **Gestão de Usuários**: Visualizar e editar perfis.
 - **Auditoria**: Visualizar, arquivar e deletar ocorrências RAIA e Inconsistências.
+
+### 5.7. Interface (UI/UX)
+- **Design**: Estilo consistente com botões padronizados e layouts responsivos (Mobile First).
+- **Menus**: Acesso rápido com cartões visuais (tamanho otimizado).
+- **Dashboards**: Módulos futuros (Mergulho, Ronda, Fogo) indicados como "Em Breve".
 
 ## 6. Configuração e Deploy
 
@@ -122,3 +131,7 @@ O **RAIA (Registro de Atendimento Integrado e Análise)** é um sistema web dese
 ### Execução
 1.  `./start.sh` para iniciar.
 2.  Acessar porta `3001`.
+
+### Login admin
+1.  admin@raia.app
+2.  193193
