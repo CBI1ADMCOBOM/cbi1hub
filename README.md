@@ -38,6 +38,3 @@ Este projeto é uma plataforma web para gestão de ocorrências (RAIA) e comunic
     - **Vulto**: Adicionada opção de excluir ocorrência (próprio usuário).
     - **Vulto**: Corrigido erro de schema (municipio_nome vs id) no salvamento.
 
-### Login admin
-1.  admin@raia.app
-2.  193193
