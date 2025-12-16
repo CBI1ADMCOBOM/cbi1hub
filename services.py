@@ -31,8 +31,21 @@ MINIO_BUCKET = "raia-photos"
 MINIO_PUBLIC_URL_BASE = f"http://{MINIO_ENDPOINT}/{MINIO_BUCKET}"
 
 try:
+    # MinIO client expects endpoint without scheme (http://)
+    minio_endpoint_clean = MINIO_ENDPOINT.replace("http://", "").replace("https://", "")
+
+    # Configuration for Public Access URL
+    # Use MINIO_EXTERNAL_URL if set, otherwise fallback to MINIO_ENDPOINT
+    # Ensure we don't end up with double http:// or missing schemes
+    _external_url = os.environ.get("MINIO_EXTERNAL_URL", MINIO_ENDPOINT)
+    
+    if not _external_url.startswith("http://") and not _external_url.startswith("https://"):
+        _external_url = f"http://{_external_url}"
+        
+    MINIO_PUBLIC_URL_BASE = f"{_external_url}/{MINIO_BUCKET}"
+
     minio_client = Minio(
-        MINIO_ENDPOINT,
+        minio_endpoint_clean,
         access_key=MINIO_ACCESS_KEY,
         secret_key=MINIO_SECRET_KEY,
         secure=False 

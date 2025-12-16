@@ -32,8 +32,11 @@ Este projeto é uma plataforma web para gestão de ocorrências (RAIA) e comunic
 
 ## Notas de Desenvolvimento Recentes
 - **Vulto**: Migrado de Google Apps Script para Flask.
-- **Municipalidades**: Lista fixa hardcoded no frontend para agilidade (SP).
-- **Auto-preenchimento**: O sistema preenche automaticamente dados do transmissor baseado no login.
+- **Municipalidades**: O Backend agora realiza lookup de ID para nome, permitindo salvar corretamente.
+- **Correções (Dez/2025)**:
+    - **RAIA**: Corrigido carregamento de listas (Naturezas e Concessionárias) bypassando RLS via admin client.
+    - **Vulto**: Adicionada opção de excluir ocorrência (próprio usuário).
+    - **Vulto**: Corrigido erro de schema (municipio_nome vs id) no salvamento.
 
 ### Login admin
 1.  admin@raia.app

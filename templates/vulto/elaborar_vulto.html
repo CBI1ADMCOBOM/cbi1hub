@@ -628,8 +628,8 @@
 
                     <!-- Botões de Ação -->
                     <div class="form-row" style="margin-top: 30px;">
-                        <button type="button" class="btn-premium-action">
-                            <i class="fas fa-file-alt"></i> Gerar Vulto (Padrão)
+                        <button type="button" id="btnGerarVulto" class="btn-premium-action">
+                            <i class="fas fa-file-alt"></i> Pré-visualizar Texto
                         </button>
                     </div>
 
@@ -648,7 +648,7 @@
                             </button>
                             <button type="submit" class="btn-primary"
                                 style="flex: 1; background: #1f2937; display: flex; align-items: center; justify-content: center; gap: 10px; border: none;">
-                                <i class="fas fa-save"></i> Salvar no Sistema
+                                <i class="fas fa-save"></i> Confirmar e Salvar
                             </button>
                         </div>
 
@@ -802,7 +802,7 @@ P. OFICIAIS QUE COMPARECERAM NO LOCAL: ${oficiaisLine}`;
             }
 
             // Eventos para os botões
-            const btnPadrao = document.querySelector('.form-row button.btn-primary:first-child');
+            const btnPadrao = document.getElementById('btnGerarVulto');
             const btnIA = document.querySelectorAll('.form-row button.btn-primary')[1];
 
             if (btnPadrao) {

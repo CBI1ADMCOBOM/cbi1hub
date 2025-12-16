@@ -37,6 +37,8 @@
             padding: 1rem;
             margin-bottom: 2rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            /* Prevent horizontal scroll on card */
         }
 
         .empty-state {
@@ -48,6 +50,7 @@
 
         /* Tabela simplificada */
         .table-responsive {
+            width: 100%;
             overflow-x: auto;
         }
 
@@ -62,6 +65,7 @@
             padding: 0.75rem;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
         }
 
         th {
@@ -75,6 +79,9 @@
             border-radius: 4px;
             font-size: 0.75rem;
             font-weight: 600;
+            white-space: nowrap;
+            /* Prevent badge split */
+            display: inline-block;
         }
 
         .badge-success {
@@ -125,6 +132,8 @@
             top: 0;
             right: -500px;
             width: 500px;
+            max-width: 100%;
+            /* Prevent overflow on mobile */
             height: 100vh;
             background: white;
             box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
@@ -229,6 +238,194 @@
             display: block;
             opacity: 1;
         }
+
+        /* Mobile Responsive Table to Card View */
+        @media (max-width: 768px) {
+            .section-header {
+                padding: 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .table-responsive table,
+            .table-responsive thead,
+            .table-responsive tbody,
+            .table-responsive th,
+            .table-responsive td,
+            .table-responsive tr {
+                display: block;
+            }
+
+            .table-responsive thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            .table-responsive tr {
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                margin-bottom: 1rem;
+                background: white;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            }
+
+            .table-responsive td {
+                /* Behave like a "row" */
+                border: none;
+                border-bottom: 1px solid #eee;
+                position: relative;
+                padding-left: 40%;
+                text-align: right;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                min-height: 40px;
+            }
+
+            .table-responsive td:last-child {
+                border-bottom: none;
+                justify-content: flex-end;
+                padding-top: 1rem;
+            }
+
+            .table-responsive td::before {
+                /* Now like a table header */
+                position: absolute;
+                left: 1rem;
+                width: 35%;
+                padding-right: 10px;
+                white-space: nowrap;
+                content: attr(data-label);
+                text-align: left;
+                font-weight: 600;
+                color: var(--text-muted);
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+    <style>
+        /* ... existing styles ... */
+
+        /* Toggle Switch Styles */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .switch-label {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+    </style>
+    <style>
+        /* TABS CSS - ADDED */
+        .tabs-nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            overflow-x: auto;
+            flex-wrap: wrap;
+            /* allow wrapping on small screens */
+        }
+
+        .tab-button {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 99px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .tab-button.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
@@ -237,26 +434,38 @@
         <header class="app-header">
             <div class="header-content"
                 style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <div class="logo">BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
-                        Ocorrências</span></div>
-                <div class="action-buttons" style="display: flex; gap: 10px;">
-                    {% if view_type == 'active' %}
-                    <a href="{{ url_for('admin.admin_occurrences_archived') }}" class="btn-secondary"
-                        style="margin: 0; background-color: #f97316; color: white; border: none;">
-                        <i class="bi bi-archive"></i> Ver Arquivadas
-                    </a>
-                    {% else %}
-                    <a href="{{ url_for('admin.admin_occurrences') }}" class="btn-secondary"
-                        style="margin: 0; background-color: #10b981; color: white; border: none;">
-                        <i class="bi bi-list-check"></i> Ver Ativas
-                    </a>
-                    {% endif %}
-                    <a href="{{ url_for('admin.admin_dashboard') }}" class="btn-secondary" style="margin: 0;">
-                        <i class="bi bi-arrow-left"></i> Voltar ao Menu Admin
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/brasao_bombeiros.png') }}" alt="Brasão Bombeiros"
+                        style="height: 40px; width: auto; margin-right: 10px;">
+                    <span>BOMBEIROS CBI-1 <span style="font-weight: 400; font-size: 0.9em; opacity: 0.8;">|
+                            Ocorrências</span></span>
+                </div>
+                <div class="action-buttons" style="display: flex; gap: 15px; align-items: center;">
+                    <div class="switch-container">
+                        <span class="switch-label">Arquivadas</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="archiveToggle" {% if view_type=='archived' %}checked{% endif %}
+                                onchange="toggleArchiveView(this)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <a href="{{ url_for('admin.admin_dashboard') }}" class="header-icon-btn">
+                        <i class="bi bi-grid-fill"></i> Menu
                     </a>
                 </div>
             </div>
         </header>
+
+        <script>
+            function toggleArchiveView(checkbox) {
+                if (checkbox.checked) {
+                    window.location.href = "{{ url_for('admin.admin_occurrences_archived') }}";
+                } else {
+                    window.location.href = "{{ url_for('admin_occurrences') }}";
+                }
+            }
+        </script>
 
         <main class="app-content" style="max-width: 1200px;"> <!-- Largura maior para tabelas -->
 
@@ -268,188 +477,84 @@
             </div>
             {% endif %}
 
+            <!-- TABS NAVIGATION -->
+            <div class="tabs-nav">
+                <button class="tab-button active" onclick="switchTab('inc', event)">Inconsistências ({{
+                    inconsistencias|length }})</button>
+                <button class="tab-button" onclick="switchTab('chuvas', event)">Chuvas Intensas ({{ chuvas|length
+                    }})</button>
+                <button class="tab-button" onclick="switchTab('raia', event)">R.A.I.A ({{ raias|length }})</button>
+                <button class="tab-button" onclick="switchTab('vulto', event)">Vulto ({{ vultos|length }})</button>
+            </div>
+
             <!-- Seção INCONSISTÊNCIA -->
-            <div class="section-header" style="border-left-color: #ffc107;"> <!-- Cor diferente para Inconsistência -->
-                <h2 class="section-title">INCONSISTÊNCIA</h2>
-                <span class="badge badge-warning">{{ inconsistencias|length }} Registros</span>
-            </div>
-            <div class="occurrence-list">
-                {% if inconsistencias %}
-                <div class="table-responsive">
-                    <div style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9em;">
-                        <i class="bi bi-info-circle"></i> Exibindo todas as inconsistências registradas.
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Talão</th>
-                                <th>Status</th>
-                                <th>Tipo</th>
-                                <th>Motivo</th>
-                                <th>Detalhes</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for inc in inconsistencias %}
-                            <tr>
-                                <td>{{ (inc.data_ocorrencia or '').split('-')[::-1] | join('/') }}</td>
-                                <td>{{ inc.talao_numero or '-' }}</td>
-                                <td>
-                                    <span class="badge badge-status-{{ (inc.status or 'NOVO') | lower }}">{{ inc.status
-                                        or 'NOVO' }}</span>
-                                </td>
-
-                                <td>
-                                    <span
-                                        class="badge badge-{{ 'primary' if inc.tipo == 'OPERACIONAL' else 'warning' }}"
-                                        style="background: {{ '#dbeafe' if inc.tipo == 'OPERACIONAL' else '#ffedd5' }}; color: {{ '#1e40af' if inc.tipo == 'OPERACIONAL' else '#9a3412' }};">
-                                        {{ inc.tipo }}
-                                    </span>
-                                </td>
-                                <td>
-                                    {% if inc.tipo == 'OPERACIONAL' %}
-                                    {{ inc.motivo_op_descricao or inc.motivo_op_codigo }}
-                                    {% else %}
-                                    {{ inc.motivo_tec_descricao or inc.motivo_tec_codigo }}
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if inc.motivo_tec_codigo == 'T4_193' %}
-                                    <small class="text-muted">193 ({{ inc.t4_falha }})</small>
-                                    {% elif inc.motivo_tec_codigo == 'T4_APP' %}
-                                    <small class="text-muted">App ({{ inc.t4_sistema_afetado }})</small>
-                                    {% elif inc.observacao %}
-                                    <small class="text-muted"
-                                        style="display:inline-block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom;">
-                                        {{ inc.observacao }}
-                                    </small>
-                                    {% else %}
-                                    -
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <button class="btn-secondary btn-sm btn-view"
-                                        onclick='openIncDetails({{ inc | tojson | safe }})'
-                                        style="padding: 0.25rem 0.5rem;">Ver</button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="empty-state">Nenhuma inconsistência reportada até o momento.</div>
-                {% endif %}
-            </div>
-
-            <hr style="border: 0; border-top: 2px dashed rgba(255,255,255,0.3); margin: 3rem 0;">
-
-            <!-- Seção CHUVAS INTENSAS -->
-            <div class="section-header" style="border-left-color: #0ea5e9;"> <!-- Cor azul claro para Chuvas -->
-                <h2 class="section-title">CHUVAS INTENSAS</h2>
-                <span class="badge badge-warning">{{ chuvas|length }} Registros</span>
-            </div>
-            <div class="occurrence-list">
-                {% if chuvas %}
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Talão</th>
-                                <th>Natureza</th>
-                                <th>Endereço</th>
-                                <th>Prioridade</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for c in chuvas %}
-                            <tr>
-                                <td>{{ (c.data_hora or '').split('T')[0].split('-')[::-1] | join('/') }}</td>
-                                <td>{{ c.talao_numero or '-' }}</td>
-                                <td><strong>{{ chuvas_nature_map[c.natureza_codigo] if chuvas_nature_map and
-                                        c.natureza_codigo in chuvas_nature_map else (c.natureza_codigo or '-')
-                                        }}</strong></td>
-                                <td>
-                                    <div
-                                        style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                        {{ c.endereco or '-' }}
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge"
-                                        style="background: {{ '#fecca4' if c.prioridade == 'ALTA' else '#f3f4f6' }}; color: {{ '#c2410c' if c.prioridade == 'ALTA' else '#374151' }};">
-                                        {{ c.prioridade }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn-secondary btn-sm btn-view"
-                                        onclick="openChuvasDetails(chuvasData[{{ loop.index0 }}])"
-                                        style="padding: 0.25rem 0.5rem;">Ver</button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="empty-state">Nenhuma ocorrência de Chuva registrada.</div>
-                {% endif %}
-            </div>
-
-            <hr style="border: 0; border-top: 2px dashed rgba(255,255,255,0.3); margin: 3rem 0;">
-
-            <!-- SECTION: RAIA -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h2 class="section-title">R.A.I.A</h2>
-                    <span class="badge badge-warning">{{ raias|length }} Registros</span>
+            <div id="tab-inc" class="tab-pane active">
+                <div class="section-header" style="border-left-color: #ffc107;">
+                    <!-- Cor diferente para Inconsistência -->
+                    <h2 class="section-title">INCONSISTÊNCIA</h2>
+                    <span class="badge badge-warning">{{ inconsistencias|length }} Registros</span>
                 </div>
                 <div class="occurrence-list">
-                    {% if raias %}
+                    {% if inconsistencias %}
                     <div class="table-responsive">
+                        <div style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9em;">
+                            <i class="bi bi-info-circle"></i> Exibindo todas as inconsistências registradas.
+                        </div>
                         <table>
                             <thead>
                                 <tr>
-                                    <th>ID</th>
                                     <th>Data</th>
-                                    <th>Natureza</th>
-                                    <th>Local</th>
-                                    <th>Responsável</th>
+                                    <th>Talão</th>
                                     <th>Status</th>
+                                    <th>Tipo</th>
+                                    <th>Motivo</th>
+                                    <th>Detalhes</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for oco in raias %}
+                                {% for inc in inconsistencias %}
                                 <tr>
-                                    <td title="{{ oco.id }}">
-                                        <span style="font-family: monospace;">{{ oco.id[:8] if oco.id else '-' }}</span>
+                                    <td data-label="Data">{{ (inc.data_ocorrencia or '').split('-')[::-1] | join('/') }}
                                     </td>
-                                    <td>
-                                        {% if oco.created_at %}
-                                        {% set created_date = oco.created_at.split('T')[0] %}
-                                        {{ created_date.split('-')[::-1] | join('/') }}
+                                    <td data-label="Talão">{{ inc.talao_numero or '-' }}</td>
+                                    <td data-label="Status">
+                                        <span class="badge badge-status-{{ (inc.status or 'NOVO') | lower }}">{{
+                                            inc.status
+                                            or 'NOVO' }}</span>
+                                    </td>
+
+                                    <td data-label="Tipo">
+                                        <span
+                                            class="badge badge-{{ 'primary' if inc.tipo == 'OPERACIONAL' else 'warning' }}"
+                                            style="background: {{ '#dbeafe' if inc.tipo == 'OPERACIONAL' else '#ffedd5' }}; color: {{ '#1e40af' if inc.tipo == 'OPERACIONAL' else '#9a3412' }};">
+                                            {{ inc.tipo }}
+                                        </span>
+                                    </td>
+                                    <td data-label="Motivo">
+                                        {% if inc.tipo == 'OPERACIONAL' %}
+                                        {{ inc.motivo_op_descricao or inc.motivo_op_codigo }}
+                                        {% else %}
+                                        {{ inc.motivo_tec_descricao or inc.motivo_tec_codigo }}
+                                        {% endif %}
+                                    </td>
+                                    <td data-label="Detalhes">
+                                        {% if inc.motivo_tec_codigo == 'T4_193' %}
+                                        <small class="text-muted">193 ({{ inc.t4_falha }})</small>
+                                        {% elif inc.motivo_tec_codigo == 'T4_APP' %}
+                                        <small class="text-muted">App ({{ inc.t4_sistema_afetado }})</small>
+                                        {% elif inc.observacao %}
+                                        <small class="text-muted"
+                                            style="display:inline-block; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom;">
+                                            {{ inc.observacao }}
+                                        </small>
                                         {% else %}
                                         -
                                         {% endif %}
-                                    </td> <!-- Formatar data no backend ou JS se preferir -->
-                                    <td>
-                                        <strong>{{ raia_nature_map[oco.nature_id] if raia_nature_map and oco.nature_id
-                                            in
-                                            raia_nature_map else oco.nature_id }}</strong>
                                     </td>
-                                    <td>{{ oco.manual_location or oco.address }}</td>
-                                    <td>{{ oco.responsible_name or '-' }}</td>
-                                    <td><span class="badge badge-status-{{ (oco.status or 'NOVO') | lower }}">{{
-                                            'NOVO' if oco.status == 'OPEN' else oco.status }}</span></td>
-                                    <td>
+                                    <td data-label="Ações">
                                         <button class="btn-secondary btn-sm btn-view"
-                                            onclick='openDetails({{ oco | tojson | safe }})'
-                                            style="padding: 0.25rem 0.5rem;">Ver</button>
+                                            onclick='openIncDetails({{ inc | tojson | safe }})'>Ver</button>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -457,65 +562,179 @@
                         </table>
                     </div>
                     {% else %}
-                    <div class="empty-state">Nenhuma ocorrência RAIA registrada.</div>
+                    <div class="empty-state">Nenhuma inconsistência reportada até o momento.</div>
                     {% endif %}
                 </div>
             </div>
 
+            <!-- Seção CHUVAS INTENSAS -->
+            <div id="tab-chuvas" class="tab-pane">
+                <div class="section-header" style="border-left-color: #0ea5e9;"> <!-- Cor azul claro para Chuvas -->
+                    <h2 class="section-title">CHUVAS INTENSAS</h2>
+                    <span class="badge badge-warning">{{ chuvas|length }} Registros</span>
+                </div>
+                <div class="occurrence-list">
+                    {% if chuvas %}
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Talão</th>
+                                    <th>Natureza</th>
+                                    <th>Endereço</th>
+                                    <th>Prioridade</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in chuvas %}
+                                <tr>
+                                    <td data-label="Data">{{ (c.data_hora or '').split('T')[0].split('-')[::-1] |
+                                        join('/')
+                                        }}</td>
+                                    <td data-label="Talão">{{ c.talao_numero or '-' }}</td>
+                                    <td data-label="Natureza"><strong>{{ chuvas_nature_map[c.natureza_codigo] if
+                                            chuvas_nature_map and
+                                            c.natureza_codigo in chuvas_nature_map else (c.natureza_codigo or '-')
+                                            }}</strong></td>
+                                    <td data-label="Endereço">
+                                        <div
+                                            style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                            {{ c.endereco or '-' }}
+                                        </div>
+                                    </td>
+                                    <td data-label="Prioridade">
+                                        <span class="badge"
+                                            style="background: {{ '#fecca4' if c.prioridade == 'ALTA' else '#f3f4f6' }}; color: {{ '#c2410c' if c.prioridade == 'ALTA' else '#374151' }};">
+                                            {{ c.prioridade }}
+                                        </span>
+                                    </td>
+                                    <td data-label="Ações">
+                                        <button class="btn-secondary btn-sm btn-view"
+                                            onclick="openChuvasDetails(chuvasData[{{ loop.index0 }}])">Ver</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">Nenhuma ocorrência de Chuva registrada.</div>
+                    {% endif %}
+                </div>
+            </div>
 
-            <hr style="border: 0; border-top: 2px dashed rgba(255,255,255,0.3); margin: 3rem 0;">
+            <!-- SECTION: RAIA -->
+            <div id="tab-raia" class="tab-pane">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">R.A.I.A</h2>
+                        <span class="badge badge-warning">{{ raias|length }} Registros</span>
+                    </div>
+                    <div class="occurrence-list">
+                        {% if raias %}
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Data</th>
+                                        <th>Natureza</th>
+                                        <th>Local</th>
+                                        <th>Responsável</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for oco in raias %}
+                                    <tr>
+                                        <td data-label="ID" title="{{ oco.id }}">
+                                            <span style="font-family: monospace;">{{ oco.id[:8] if oco.id else '-'
+                                                }}</span>
+                                        </td>
+                                        <td data-label="Data">
+                                            {% if oco.created_at %}
+                                            {% set created_date = oco.created_at.split('T')[0] %}
+                                            {{ created_date.split('-')[::-1] | join('/') }}
+                                            {% else %}
+                                            -
+                                            {% endif %}
+                                        </td> <!-- Formatar data no backend ou JS se preferir -->
+                                        <td data-label="Natureza">
+                                            <strong>{{ raia_nature_map[oco.nature_id] if raia_nature_map and
+                                                oco.nature_id
+                                                in
+                                                raia_nature_map else oco.nature_id }}</strong>
+                                        </td>
+                                        <td data-label="Local">{{ oco.manual_location or oco.address }}</td>
+                                        <td data-label="Responsável">{{ oco.responsible_name or '-' }}</td>
+                                        <td data-label="Status"><span
+                                                class="badge badge-status-{{ (oco.status or 'NOVO') | lower }}">{{
+                                                'NOVO' if oco.status == 'OPEN' else oco.status }}</span></td>
+                                        <td data-label="Ações">
+                                            <button class="btn-secondary btn-sm btn-view"
+                                                onclick='openDetails({{ oco | tojson | safe }})'>Ver</button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="empty-state">Nenhuma ocorrência RAIA registrada.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
 
             <!-- Seção VULTO -->
-            <div class="section-header" style="border-left-color: #dc3545;"> <!-- Cor diferente para Vulto -->
-                <h2 class="section-title">OCORRÊNCIA DE VULTO</h2>
-                <span class="badge badge-warning">{{ vultos|length }} Registros</span>
-            </div>
-            <div class="occurrence-list">
-                {% if vultos %}
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Talão</th>
-                                <th>Natureza</th>
-                                <th>Município</th>
-                                <th>Detalhes</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for v in vultos %}
-                            <tr>
-                                <td>{{ (v.data_inicio or '').split('-')[::-1] | join('/') }}</td>
-                                <td>{{ v.talao_numero or '-' }}</td>
-                                <td>
-                                    <strong>{{ v.natureza_codigo }}</strong>
-                                </td>
-                                <td>{{ v.municipio_nome }}</td>
-                                <td>
-                                    {{ v.qtd_viaturas }} VTRs, {{ v.qtd_bombeiros }} Militares
-                                </td>
-                                <td>
-                                    <button class="btn-secondary btn-sm btn-view"
-                                        onclick='openVultoDetails({{ v | tojson | safe }})'
-                                        style="padding: 0.25rem 0.5rem;">Ver</button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <div id="tab-vulto" class="tab-pane">
+                <div class="section-header" style="border-left-color: #dc3545;"> <!-- Cor diferente para Vulto -->
+                    <h2 class="section-title">OCORRÊNCIA DE VULTO</h2>
+                    <span class="badge badge-warning">{{ vultos|length }} Registros</span>
                 </div>
-                {% else %}
-                <div class="empty-state">Nenhuma ocorrência de Vulto registrada.</div>
-                {% endif %}
+                <div class="occurrence-list">
+                    {% if vultos %}
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Talão</th>
+                                    <th>Natureza</th>
+                                    <th>Município</th>
+                                    <th>Detalhes</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for v in vultos %}
+                                <tr>
+                                    <td data-label="Data">{{ (v.data_inicio or '').split('-')[::-1] | join('/') }}</td>
+                                    <td data-label="Talão">{{ v.talao_numero or '-' }}</td>
+                                    <td data-label="Natureza">
+                                        <strong>{{ v.natureza_codigo }}</strong>
+                                    </td>
+                                    <td data-label="Município">{{ v.municipio_nome }}</td>
+                                    <td data-label="Detalhes">
+                                        {{ v.qtd_viaturas }} VTRs, {{ v.qtd_bombeiros }} Militares
+                                    </td>
+                                    <td data-label="Ações">
+                                        <button class="btn-secondary btn-sm btn-view"
+                                            onclick='openVultoDetails({{ v | tojson | safe }})'>Ver</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">Nenhuma ocorrência de Vulto registrada.</div>
+                    {% endif %}
+                </div>
             </div>
-
-            <hr style="border: 0; border-top: 2px dashed rgba(255,255,255,0.3); margin: 3rem 0;">
-
-
-
-
 
         </main>
 
@@ -538,6 +757,19 @@
         const panelOverlay = document.getElementById('panelOverlay');
         const closeBtn = document.getElementById('closePanel');
         const panelBody = document.getElementById('panelBody');
+
+        function switchTab(tabId, event) {
+            // Remove active class from buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            if (event) event.currentTarget.classList.add('active');
+
+            // Hide all panes
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+            // Show selected pane
+            const pane = document.getElementById('tab-' + tabId);
+            if (pane) pane.classList.add('active');
+        }
 
         function closeSidePanel() {
             sidePanel.classList.remove('open');
@@ -888,8 +1120,8 @@
             if (!confirm('ATENÇÃO: Tem certeza que deseja EXCLUIR permanentemente esta inconsistência?')) return;
 
             try {
-                // Reutilizando a API de delete que criamos anteriormente
-                const res = await fetch(`/api/inconsistencias/${id}`, { method: 'DELETE' });
+                // FIXED: Changed to ADMIN route to allow admins to delete ANY record
+                const res = await fetch(`/api/admin/inconsistencias/${id}`, { method: 'DELETE' });
                 const data = await res.json();
 
                 if (data.success) {

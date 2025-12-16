@@ -87,11 +87,11 @@
             box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
             z-index: 2001;
             transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.3s;
-            padding: 2rem;
-            overflow-y: auto;
             display: flex;
             flex-direction: column;
             visibility: hidden;
+            padding: 0;
+            /* Reset padding, moved to children */
         }
 
         .side-panel.open {
@@ -104,9 +104,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
+            padding: 2rem;
             border-bottom: 1px solid var(--border-color);
+            flex: 0 0 auto;
+            /* Don't shrink/grow */
+        }
+
+        #panelContent {
+            padding: 1.5rem 2rem;
+            flex: 1;
+            /* Take remaining space */
+            overflow-y: auto;
+            /* Scrollable */
         }
 
         .close-btn {
@@ -118,6 +127,9 @@
             padding: 0.5rem;
             border-radius: 50%;
             transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .close-btn:hover {
@@ -145,9 +157,11 @@
         }
 
         .delete-section {
-            margin-top: auto;
             border-top: 1px solid var(--border-color);
-            padding-top: 2rem;
+            padding: 2rem;
+            background: white;
+            flex: 0 0 auto;
+            /* Sticky at bottom */
         }
 
         .btn-delete {
@@ -183,6 +197,25 @@
 
         .btn-icon-delete:hover {
             background: #fee2e2;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .side-panel {
+                max-width: 100%;
+            }
+
+            .side-panel-header {
+                padding: 1.5rem;
+            }
+
+            #panelContent {
+                padding: 1.5rem;
+            }
+
+            .delete-section {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -226,7 +259,7 @@
                                 <th>Motivo</th>
                                 <th>Detalhes</th>
                                 <th>Status</th>
-                                <th style="width: 50px;"></th>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -273,14 +306,7 @@
                                 <td>
                                     <span style="color: green; font-weight: 500;">Registrado</span>
                                 </td>
-                                <td style="text-align: right; white-space: nowrap;">
-                                    <button class="btn-icon-delete"
-                                        onclick="event.stopPropagation(); deleteItemDirectly('{{ item.id }}')"
-                                        title="Excluir">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                    <i class="bi bi-chevron-right" style="color: #ccc;"></i>
-                                </td>
+
                             </tr>
                             {% endfor %}
                         </tbody>

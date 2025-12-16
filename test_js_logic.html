@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Test Dropzone Logic</title>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        .upload-dropzone {
+            border: 2px dashed #b2bec3;
+            border-radius: 12px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-dropzone:hover,
+        .upload-dropzone.drag-active {
+            border-color: #d63031;
+            background-color: #fff0f0;
+            transform: scale(1.01);
+            box-shadow: 0 4px 15px rgba(214, 48, 49, 0.1);
+        }
+
+        .preview-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .preview-card {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border: 1px solid #eee;
+        }
+
+        .preview-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Teste Dropzone</h1>
+
+    <div id="dropzone" class="upload-dropzone">
+        <i class="bi bi-cloud-arrow-up-fill"></i>
+        <p>Clique ou arraste suas fotos aqui</p>
+        <input type="file" id="file-input" multiple accept="image/*" style="display: none;" />
+    </div>
+
+    <div id="gallery" class="preview-gallery"></div>
+
+    <script>
+        window.uploadedFiles = [];
+
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+        const gallery = document.getElementById('gallery');
+
+        dropzone.addEventListener('click', () => {
+            console.log("Dropzone clicked");
+            fileInput.click();
+        });
+
+        // Eventos de Drag & Drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        dropzone.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', handleFiles, false);
+
+        function handleDrop(e) {
+            console.log("Drop event detected");
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles({ target: { files: files } });
+        }
+
+        function handleFiles(e) {
+            console.log("Handling files:", e.target.files.length);
+            const files = [...e.target.files];
+            files.forEach(previewFile);
+        }
+
+        function previewFile(file) {
+            window.uploadedFiles.push(file);
+            console.log("Previewing:", file.name);
+
+            const div = document.createElement('div');
+            div.className = 'preview-card';
+            div.innerHTML = `
+                <div style="width:100px;height:100px;background:#ddd;">Simulated Image: ${file.name}</div>
+            `;
+            gallery.appendChild(div);
+        }
+    </script>
+</body>
+
+</html>

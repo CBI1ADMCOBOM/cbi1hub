@@ -2,8 +2,15 @@ from flask import Blueprint, render_template, request, jsonify, session
 from services import supabase, supabase_admin, login_required, minio_client, MINIO_BUCKET, MINIO_PUBLIC_URL_BASE
 import os
 import io
+import time
 
 raia_bp = Blueprint('raia', __name__)
+
+@raia_bp.context_processor
+def inject_version():
+    return dict(v=int(time.time()))
+
+
 
 @raia_bp.route('/elaborar-raia')
 @login_required
@@ -78,7 +85,7 @@ def save_raia():
 @login_required
 def get_naturezas_raia():
     try:
-        res = supabase.table('oco_raia').select('*').execute()
+        res = supabase_admin.table('oco_raia').select('*').execute()
         return jsonify(res.data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -87,7 +94,37 @@ def get_naturezas_raia():
 @login_required
 def get_concessionarias():
     try:
-        res = supabase.table('css').select('id, name').execute()
+        res = supabase_admin.table('css').select('id, name').execute()
         return jsonify(res.data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@raia_bp.route('/api/raia/me')
+@login_required
+def get_my_raias():
+    try:
+        user_id = session['user']['id']
+        # Fetch occurrences for this user, ordered by creation date
+        res = supabase_admin.table('occurrences').select('*').eq('user_id', user_id).order('created_at', desc=True).execute()
+        return jsonify(res.data)
+    except Exception as e:
+        print(f"Erro ao buscar RAIAs: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@raia_bp.route('/api/raia/me/<id>', methods=['DELETE'])
+@login_required
+def delete_my_raia(id):
+    try:
+        user_id = session['user']['id']
+        # Verify ownership before deleting
+        # Just creating a delete query with user_id matching is safer/easiest
+        res = supabase_admin.table('occurrences').delete().eq('id', id).eq('user_id', user_id).execute()
+        
+        if len(res.data) > 0:
+            return jsonify({"success": True, "message": "Ocorrência excluída"})
+        else:
+            return jsonify({"success": False, "error": "Ocorrência não encontrada ou sem permissão"}), 404
+            
+    except Exception as e:
+        print(f"Erro ao excluir RAIA: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500

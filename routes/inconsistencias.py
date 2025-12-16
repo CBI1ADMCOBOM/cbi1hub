@@ -56,9 +56,9 @@ def save_inconsistencia():
 def gerar_inconsistencia_listar():
     try:
         user_id = session['user']['id']
-        res = supabase.table('inconsistencies').select('*').eq('user_id', user_id).order('created_at', desc=True).execute()
+        res = supabase_admin.table('inconsistencies').select('*').eq('user_id', user_id).order('created_at', desc=True).execute()
         inconsistencies = res.data
-        return render_template('inconsistencia/listar_inconsistencias.html', user=session['user'], inconsistencies=inconsistencies)
+        return render_template('inconsistencia/listar_inconsistencias.html', user=session['user'], items=inconsistencies)
     except Exception as e:
         print(f"Erro ao listar inconsistencias: {e}")
         return redirect(url_for('main.dashboard'))

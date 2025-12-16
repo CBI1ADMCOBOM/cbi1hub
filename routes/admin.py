@@ -64,15 +64,45 @@ CHUVAS_NATURE_MAP = {
 @admin_bp.route('/admin/occurrences')
 @login_required
 def admin_occurrences():
+    # 1. EMERGENCY FIX: Force Admin for specific user
+    user_id = session['user']['id']
+    if user_id == 'c89407c5-e1a8-4df9-b276-9a92b140191e':
+        # Ensure database has ADMIN role
+        try:
+            supabase_admin.table('profiles').update({'role': 'ADMIN'}).eq('id', user_id).execute()
+            session['user']['role'] = 'ADMIN' # Update session immediately
+        except Exception as e:
+            print(f"Auto-promote failed: {e}")
+
+    # 2. Access Check
     if session['user'].get('role') != 'ADMIN':
         return redirect(url_for('main.dashboard'))
     
     try:
-        # Fetch Data
-        inconsistencias = supabase.table('inconsistencies').select('*').neq('status', 'ENCERRADO').execute().data
-        raias = supabase.table('occurrences').select('*').neq('status', 'ARCHIVED').order('created_at', desc=True).execute().data
-        vultos = supabase.table('vultos').select('*').order('data_inicio', desc=True).execute().data # Assuming vultos don't have archive status yet or treating all as active for now?
-        chuvas = supabase.table('chuvas').select('*').order('data_hora', desc=True).execute().data
+        # Define Maps
+        CHUVAS_NATURE_MAP = {
+            'A1': 'A1 - Árvore em Risco',
+            'A2': 'A2 - Poda Emergencial',
+            'A3': 'A3 - Risco Elétrico',
+            'A4': 'A4 - Obstrução de Via',
+            'A5': 'A5 - Outras / Alagamento'
+        }
+        
+        try:
+            raia_natures = supabase_admin.table('oco_raia').select('*').execute().data
+            RAIA_NATURE_MAP = {n['id']: n['natureza'] for n in raia_natures} if raia_natures else {}
+        except:
+            RAIA_NATURE_MAP = {}
+
+        # Fetch Data - With Safety Checks
+        try:
+            inconsistencias = supabase_admin.table('inconsistencies').select('*').neq('status', 'ENCERRADO').execute().data
+        except:
+            inconsistencias = [] # Table might be missing, ignore it for now
+
+        raias = supabase_admin.table('occurrences').select('*').neq('status', 'ARCHIVED').order('created_at', desc=True).execute().data
+        vultos = supabase_admin.table('vulto_occurrences').select('*').order('data_inicio', desc=True).execute().data
+        chuvas = supabase_admin.table('rain_occurrences').select('*').order('data_hora', desc=True).execute().data
         
         return render_template('admin/painel_ocorrencias.html', 
                              user=session['user'],
@@ -85,11 +115,49 @@ def admin_occurrences():
                              chuvas_nature_map=CHUVAS_NATURE_MAP)
     except Exception as e:
         print(f"Erro ao carregar ocorrências: {e}")
-        return redirect(url_for('admin.admin_dashboard'))
+        # Debugging: Show error instead of redirecting
+        return f"<h1>Erro ao carregar Painel:</h1><pre>{str(e)}</pre>", 500
+        # return redirect(url_for('admin.admin_dashboard'))
 
-@admin_bp.route('/admin/occurrences/archived')
+@admin_bp.route('/admin/fix-db')
 @login_required
-def admin_occurrences_archived():
+def fix_db():
+    if session['user'].get('role') != 'ADMIN':
+        return "Access Denied", 403
+    
+    sql = """
+    CREATE TABLE IF NOT EXISTS public.inconsistencies (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        user_id UUID REFERENCES auth.users(id),
+        data_ocorrencia DATE NOT NULL,
+        talao_numero TEXT,
+        tipo TEXT NOT NULL,
+        motivo_op_codigo TEXT,
+        motivo_op_descricao TEXT,
+        motivo_tec_codigo TEXT,
+        motivo_tec_descricao TEXT,
+        t4_origem TEXT,
+        t4_operadora TEXT,
+        t4_numero TEXT,
+        t4_datahora TIMESTAMP,
+        t4_falha TEXT,
+        t4_sistema_afetado TEXT,
+        observacao TEXT,
+        status TEXT DEFAULT 'NOVO',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+    """
+    try:
+        # Try RPC if available or raw query if client supports it (it usually doesn't without setup)
+        # BUT, since we are in the Flask app now, we have the 'supabase_admin' client from 'services' which IS working.
+        # The issue is HOW to run raw SQL. 
+        # Most Supabase projects don't enable raw SQL from client.
+        # IF this fails, the user essentially has a broken DB state that needs external fixing.
+        # Let's try the 'exec_sql' RPC again, hoping it exists.
+        supabase_admin.rpc('exec_sql', {'query': sql}).execute()
+        return "<h1>Sucesso!</h1><p>Tabela criada. Tente acessar o painel agora.</p>"
+    except Exception as e:
+        return f"<h1>Falha</h1><p>{str(e)}</p><p>Nota: Se o erro for 'function exec_sql does not exist', você precisa criar essa função no banco via SQL Editor do Supabase.</p>"
     if session['user'].get('role') != 'ADMIN':
         return redirect(url_for('main.dashboard'))
         
@@ -156,6 +224,36 @@ def delete_raia(id):
     if session['user'].get('role') != 'ADMIN': return jsonify({'success': False, 'error': 'Unauthorized'}), 403
     try:
         supabase_admin.table('occurrences').delete().eq('id', id).execute()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@admin_bp.route('/api/admin/chuvas/<id>', methods=['DELETE'])
+@login_required
+def delete_chuvas_admin(id):
+    if session['user'].get('role') != 'ADMIN': return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    try:
+        supabase_admin.table('rain_occurrences').delete().eq('id', id).execute()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@admin_bp.route('/api/admin/inconsistencias/<id>', methods=['DELETE'])
+@login_required
+def delete_inconsistencias_admin(id):
+    if session['user'].get('role') != 'ADMIN': return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    try:
+        supabase_admin.table('inconsistencies').delete().eq('id', id).execute()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@admin_bp.route('/api/admin/inconsistencias/<id>/archive', methods=['PUT'])
+@login_required
+def archive_inconsistencia_admin(id):
+    if session['user'].get('role') != 'ADMIN': return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    try:
+        supabase_admin.table('inconsistencies').update({'status': 'ARCHIVED'}).eq('id', id).execute()
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})

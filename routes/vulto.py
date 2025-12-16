@@ -49,6 +49,21 @@ def save_vulto():
                 print(f"Erro ao buscar OPM: {e}")
                 opm_text = "OPM NÃO IDENTIFICADA"
 
+        # Municipality Lookup
+        municipio_id = None
+        muni_nome = data.get('municipio_nome')
+        if muni_nome:
+            try:
+                # Case insensitive search might be needed but Supabase 'ilike' or exact match if dropdown is consistent
+                # Using 'eq' because values come from a fixed dropdown
+                muni_res = supabase.table('municipalities').select('id').eq('name', muni_nome).execute()
+                if muni_res.data:
+                    municipio_id = muni_res.data[0]['id']
+                else:
+                    print(f"Warning: Municipality '{muni_nome}' not found in DB.")
+            except Exception as e:
+                print(f"Error looking up municipality: {e}")
+
         def fmt_date(d):
             if not d: return ""
             try:
@@ -90,7 +105,7 @@ def save_vulto():
             'hora_termino': data.get('hora_termino') if data.get('hora_termino') else None,
             'justificativa_vulto': data.get('justificativa_vulto'),
             'natureza_codigo': data.get('natureza_codigo'),
-            'municipio_nome': data.get('municipio_nome'),
+            'municipio_id': municipio_id, # Changed from name to ID
             'endereco': data.get('endereco'),
             'bairro': data.get('bairro'),
             'qtd_viaturas': data.get('qtd_viaturas'),
@@ -125,8 +140,45 @@ def elaborar_vulto_listar():
 def get_my_vultos():
     try:
         user_id = session['user']['id']
-        res = supabase_admin.table('vulto_occurrences').select('*').eq('user_id', user_id).order('created_at', desc=True).execute()
-        return jsonify(res.data)
+        # Join with municipalities to get the name
+        res = supabase_admin.table('vulto_occurrences').select('*, municipalities(name)').eq('user_id', user_id).order('created_at', desc=True).execute()
+        
+        data = res.data
+        # Flatten for frontend convenience
+        for item in data:
+            if item.get('municipalities'):
+                item['municipio_nome'] = item['municipalities']['name']
+            else:
+                item['municipio_nome'] = 'Desconhecido'
+                
+        return jsonify(data)
     except Exception as e:
         print(f"Erro ao buscar vultos: {e}")
         return jsonify([]), 500
+
+@vulto_bp.route('/api/vulto/<id>', methods=['DELETE'])
+@login_required
+def delete_vulto(id):
+    try:
+        user_id = session['user']['id']
+        role = session['user'].get('role')
+        
+        # Check if record belongs to user or user is ADMIN
+        # We can do this in one query by adding the filter to the delete
+        # But explicitly checking existence first is safer for feedback
+        
+        query = supabase_admin.table('vulto_occurrences').delete().eq('id', id)
+        
+        if role != 'ADMIN':
+            query = query.eq('user_id', user_id)
+            
+        res = query.execute()
+        
+        if res.data:
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Registro não encontrado ou sem permissão.'}), 404
+            
+    except Exception as e:
+        print(f"Erro ao excluir vulto: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500

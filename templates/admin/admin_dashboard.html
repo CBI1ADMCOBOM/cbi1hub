@@ -190,13 +190,20 @@
     </div>
 
     <script>
-        let usersData = [];
+        // Initialize with data passed from server
+        let usersData = {{ all_users | tojson }};
 
+        // Render immediately
+        renderUsers(usersData);
+
+        // Remove old loadUsers function
+        /*
         async function loadUsers() {
             const res = await fetch('/api/admin/users');
             usersData = await res.json();
             renderUsers(usersData);
         }
+        */
 
         function renderUsers(users) {
             const tbody = document.getElementById('users-table-body');
@@ -295,7 +302,7 @@
             renderUsers(filtered);
         });
 
-        loadUsers();
+        // loadUsers();
     </script>
 </body>
 
